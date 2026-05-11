@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from "react";
 import Layout from "@/components/Layout";
 import BruMark from "@/components/BruMark";
 import { Button } from "@/components/ui/button";
@@ -18,7 +17,6 @@ import {
   Handshake,
   MessageCircle,
 } from "lucide-react";
-import heroRoofingTeam from "@/assets/home/hero-roofing-team.jpg";
 import cardKitchen from "@/assets/services/card-kitchen.jpg";
 import cardRoofing from "@/assets/services/card-roofing.jpg";
 import cardBathroom from "@/assets/services/card-bathroom.jpg";
@@ -26,58 +24,20 @@ import cardBathroom from "@/assets/services/card-bathroom.jpg";
 /**
  * AboutHero — custom cinematic hero for the About page.
  *
- * Renders /videos/about-hero.mp4 with three cinematic overlay layers
+ * Renders a static team image with cinematic overlay layers
  * (left-to-right dark gradient, warm radial from upper-right, subtle
  * 1px backdrop blur), plus a left-aligned content block (eyebrow,
  * headline, subtext, CTA, trust microcopy).
- *
- * Reduced-motion / video-fail: falls back to a static poster.
  */
 const AboutHero = () => {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoFailed, setVideoFailed] = useState(false);
-  const [reducedMotion] = useState(() =>
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  );
-
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const handler = () => {
-      if (mq.matches) videoRef.current?.pause();
-      else videoRef.current?.play().catch(() => {});
-    };
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
-
-  const showVideo = !videoFailed && !reducedMotion;
-
   return (
     <section className="relative h-[70vh] min-h-[520px] flex items-center overflow-hidden bg-primary">
-      {/* Background — video or static fallback */}
-      {showVideo ? (
-        <video
-          ref={videoRef}
-          className="absolute inset-0 w-full h-full object-cover scale-[1.05]"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          poster={heroRoofingTeam}
-          onError={() => setVideoFailed(true)}
-        >
-          <source src="/videos/about-hero.mp4" type="video/mp4" />
-        </video>
-      ) : (
-        <img
-          src={heroRoofingTeam}
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover scale-[1.05]"
-        />
-      )}
+      {/* Background — static team image */}
+      <img
+        src="/images/work-team-pic.jpg"
+        alt="Construction team working together"
+        className="absolute inset-0 w-full h-full object-cover scale-[1.05] rounded-2xl shadow-lg"
+      />
 
       {/* Layer 1 — dark gradient L→R for left-aligned text legibility */}
       <div
