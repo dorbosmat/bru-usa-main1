@@ -1,0 +1,279 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Toast layout V1: offset toast above chat widget */
+    --chat-widget-height: 56px;
+    --chat-offset-bottom: 24px;
+    --toast-offset-bottom: calc(var(--chat-offset-bottom) + var(--chat-widget-height) + 16px);
+
+    --background: 210 20% 98%;
+    --foreground: 215 35% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 35% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 35% 15%;
+
+    --primary: 215 65% 18%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 25% 93%;
+    --secondary-foreground: 215 35% 15%;
+
+    --muted: 210 20% 95%;
+    --muted-foreground: 215 15% 45%;
+
+    --accent: 24 95% 53%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214 20% 88%;
+    --input: 214 20% 88%;
+    --ring: 24 95% 53%;
+
+    --radius: 0.5rem;
+
+    --navy-dark: 215 65% 12%;
+    --navy-light: 215 40% 30%;
+    --orange-bright: 24 95% 53%;
+    --orange-hover: 24 95% 45%;
+
+    --font-display: 'Outfit', sans-serif;
+    --font-body: 'Inter', sans-serif;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+  }
+}
+
+@keyframes heroZoom {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.08); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+
+@keyframes scan-beam {
+  0%   { transform: translateX(150%);  opacity: 0; }
+  15%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: translateX(-300%); opacity: 0; }
+}
+
+@keyframes signal-bar {
+  0%, 100% { transform: scaleY(0.35); opacity: 0.55; }
+  50%      { transform: scaleY(1);    opacity: 1;    }
+}
+
+@keyframes hologram-line {
+  0%   { transform: translateY(-20%); opacity: 0; }
+  10%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: translateY(120%); opacity: 0; }
+}
+
+@keyframes ambient-breathe {
+  0%, 100% { opacity: 0.88; }
+  50%      { opacity: 1;    }
+}
+
+@keyframes blueprint-pulse {
+  to { stroke-dashoffset: -100; }
+}
+
+/* Mobile: bump toast higher to clear sticky CTA + chat widget */
+@media (max-width: 767px) {
+  :root {
+    --chat-offset-bottom: 80px;
+    --toast-offset-bottom: calc(var(--chat-offset-bottom) + var(--chat-widget-height) + 16px);
+  }
+}
+
+
+/* AI Preview nav item - glowing green effect */
+@keyframes ai-glow-pulse {
+  0%, 100% {
+    color: #4ade80;
+    text-shadow: 0 0 6px rgba(74, 222, 128, 0.6), 0 0 12px rgba(74, 222, 128, 0.3);
+  }
+  50% {
+    color: #86efac;
+    text-shadow: 0 0 10px rgba(134, 239, 172, 0.9), 0 0 20px rgba(74, 222, 128, 0.5);
+  }
+}
+
+.nav-ai-preview {
+  animation: ai-glow-pulse 2.5s ease-in-out infinite !important;
+  font-weight: 600 !important;
+}
+
+.nav-ai-preview:hover {
+  animation: none !important;
+  color: #86efac !important;
+  text-shadow: 0 0 14px rgba(134, 239, 172, 1), 0 0 28px rgba(74, 222, 128, 0.7) !important;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   Premium3DHeading — cinematic 3D text system (Home + Contact only)
+   ──────────────────────────────────────────────────────────────────────── */
+
+@keyframes title-letter-wave {
+  0%, 100% { transform: translateY(0) translateZ(0) rotateX(0); }
+  50%      { transform: translateY(-4px) translateZ(14px) rotateX(6deg); }
+}
+
+/* Hero variant — perspective + scroll-depth transform driven by CSS variables.
+   --p3d-light-x / --p3d-light-y (range -1..1) are driven by a JS pointer
+   listener and feed the text-shadow stacks below for cursor-driven specular
+   highlights and shadow parallax. They default to 0 so the heading still looks
+   correct without JS or for coarse-pointer / reduced-motion users. */
+.p3d-variant-hero {
+  --p3d-light-x: 0;
+  --p3d-light-y: 0;
+  transform-style: preserve-3d;
+  transform: translate3d(0, var(--p3d-ty, 0), var(--p3d-tz, 0)) rotateX(var(--p3d-rx, 0));
+  will-change: transform;
+  transition: text-shadow 0.3s ease-out;
+}
+
+.p3d-variant-section {
+  transition: text-shadow 0.4s ease-out;
+}
+
+/* ────── Light theme — light text on dark bg (white text → black extrusion) ────── */
+
+/* Cursor-driven layers (last 3 shadows):
+   - Soft top-edge specular highlight that drifts with the cursor.
+   - Inner drop shadow that parallaxes opposite the cursor.
+   - Outer drop shadow that parallaxes opposite the cursor more strongly. */
+.p3d-theme-light.p3d-variant-hero {
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.70),
+    0 2px 0 rgba(0, 0, 0, 0.62),
+    0 3px 0 rgba(0, 0, 0, 0.55),
+    0 4px 0 rgba(0, 0, 0, 0.48),
+    0 5px 0 rgba(0, 0, 0, 0.41),
+    0 6px 0 rgba(0, 0, 0, 0.34),
+    0 7px 0 rgba(0, 0, 0, 0.28),
+    0 8px 0 rgba(0, 0, 0, 0.22),
+    0 9px 0 rgba(0, 0, 0, 0.16),
+    0 10px 0 rgba(0, 0, 0, 0.10),
+    calc(var(--p3d-light-x) * 6px) calc(-2px + var(--p3d-light-y) * 4px) 10px rgba(255, 255, 255, 0.32),
+    calc(var(--p3d-light-x) * -8px) calc(14px + var(--p3d-light-y) * -6px) 24px rgba(0, 0, 0, 0.72),
+    calc(var(--p3d-light-x) * -14px) calc(22px + var(--p3d-light-y) * -10px) 40px rgba(0, 0, 0, 0.55);
+}
+.p3d-theme-light.p3d-variant-hero:hover {
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.75),
+    0 2px 0 rgba(0, 0, 0, 0.68),
+    0 3px 0 rgba(0, 0, 0, 0.61),
+    0 4px 0 rgba(0, 0, 0, 0.54),
+    0 5px 0 rgba(0, 0, 0, 0.47),
+    0 6px 0 rgba(0, 0, 0, 0.40),
+    0 7px 0 rgba(0, 0, 0, 0.34),
+    0 8px 0 rgba(0, 0, 0, 0.28),
+    0 9px 0 rgba(0, 0, 0, 0.22),
+    0 10px 0 rgba(0, 0, 0, 0.16),
+    0 11px 0 rgba(0, 0, 0, 0.10),
+    0 12px 0 rgba(0, 0, 0, 0.06),
+    calc(var(--p3d-light-x) * 8px) calc(-3px + var(--p3d-light-y) * 5px) 14px rgba(255, 255, 255, 0.42),
+    calc(var(--p3d-light-x) * -10px) calc(18px + var(--p3d-light-y) * -8px) 32px rgba(0, 0, 0, 0.82),
+    calc(var(--p3d-light-x) * -18px) calc(28px + var(--p3d-light-y) * -12px) 50px rgba(0, 0, 0, 0.62);
+}
+
+.p3d-theme-light.p3d-variant-section {
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.40),
+    0 2px 0 rgba(0, 0, 0, 0.30),
+    0 3px 0 rgba(0, 0, 0, 0.20),
+    0 6px 14px rgba(0, 0, 0, 0.45);
+}
+.p3d-theme-light.p3d-variant-section:hover {
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.45),
+    0 2px 0 rgba(0, 0, 0, 0.36),
+    0 3px 0 rgba(0, 0, 0, 0.27),
+    0 4px 0 rgba(0, 0, 0, 0.18),
+    0 8px 18px rgba(0, 0, 0, 0.55);
+}
+
+/* ────── Dark theme — dark text on light bg (subtler navy extrusion) ────── */
+
+.p3d-theme-dark.p3d-variant-hero {
+  text-shadow:
+    0 1px 0 hsl(215 50% 22% / 0.32),
+    0 2px 0 hsl(215 50% 22% / 0.28),
+    0 3px 0 hsl(215 50% 22% / 0.24),
+    0 4px 0 hsl(215 50% 22% / 0.20),
+    0 5px 0 hsl(215 50% 22% / 0.16),
+    0 6px 0 hsl(215 50% 22% / 0.12),
+    0 7px 0 hsl(215 50% 22% / 0.08),
+    0 8px 0 hsl(215 50% 22% / 0.05),
+    calc(var(--p3d-light-x) * 4px) calc(-1px + var(--p3d-light-y) * 3px) 8px rgba(255, 255, 255, 0.18),
+    calc(var(--p3d-light-x) * -6px) calc(12px + var(--p3d-light-y) * -5px) 22px rgba(15, 23, 42, 0.32),
+    calc(var(--p3d-light-x) * -12px) calc(20px + var(--p3d-light-y) * -8px) 36px rgba(15, 23, 42, 0.22);
+}
+.p3d-theme-dark.p3d-variant-hero:hover {
+  text-shadow:
+    0 1px 0 hsl(215 50% 22% / 0.38),
+    0 2px 0 hsl(215 50% 22% / 0.34),
+    0 3px 0 hsl(215 50% 22% / 0.30),
+    0 4px 0 hsl(215 50% 22% / 0.26),
+    0 5px 0 hsl(215 50% 22% / 0.22),
+    0 6px 0 hsl(215 50% 22% / 0.18),
+    0 7px 0 hsl(215 50% 22% / 0.14),
+    0 8px 0 hsl(215 50% 22% / 0.10),
+    0 9px 0 hsl(215 50% 22% / 0.06),
+    calc(var(--p3d-light-x) * 6px) calc(-2px + var(--p3d-light-y) * 4px) 12px rgba(255, 255, 255, 0.26),
+    calc(var(--p3d-light-x) * -8px) calc(14px + var(--p3d-light-y) * -6px) 28px rgba(15, 23, 42, 0.40),
+    calc(var(--p3d-light-x) * -16px) calc(24px + var(--p3d-light-y) * -10px) 44px rgba(15, 23, 42, 0.28);
+}
+
+.p3d-theme-dark.p3d-variant-section {
+  text-shadow:
+    0 1px 0 hsl(215 50% 25% / 0.14),
+    0 2px 0 hsl(215 50% 25% / 0.10),
+    0 3px 0 hsl(215 50% 25% / 0.06),
+    0 5px 10px rgba(15, 23, 42, 0.16);
+}
+.p3d-theme-dark.p3d-variant-section:hover {
+  text-shadow:
+    0 1px 0 hsl(215 50% 25% / 0.18),
+    0 2px 0 hsl(215 50% 25% / 0.13),
+    0 3px 0 hsl(215 50% 25% / 0.09),
+    0 4px 0 hsl(215 50% 25% / 0.06),
+    0 6px 14px rgba(15, 23, 42, 0.20);
+}
+

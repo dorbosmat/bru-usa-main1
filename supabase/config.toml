@@ -1,0 +1,10 @@
+project_id = "tnimgsfmfwnskmvuqsis"
+
+[functions.notify-lead]
+verify_jwt = false
+
+[functions.distribute-lead]
+verify_jwt = false
+
+[functions.ai-renovation]
+verify_jwt = false

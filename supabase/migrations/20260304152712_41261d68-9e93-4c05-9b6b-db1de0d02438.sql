@@ -1,0 +1,1 @@
+ALTER TABLE public.leads ADD COLUMN service_area text;

@@ -1,0 +1,1 @@
+UPDATE photos SET approved = true WHERE storage_path IS NOT NULL AND storage_path != '';

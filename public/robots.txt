@@ -1,0 +1,22 @@
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /admin
+Disallow: /cookie-policy
+Disallow: /sms-consent
+Disallow: /ccpa-notice
+Disallow: /data-rights
+
+Sitemap: https://buildright-usa.com/sitemap.xml

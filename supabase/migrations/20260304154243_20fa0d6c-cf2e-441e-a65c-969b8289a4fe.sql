@@ -1,0 +1,1 @@
+ALTER TABLE public.leads ADD COLUMN callback_requested boolean NOT NULL DEFAULT false;
