@@ -31,12 +31,12 @@ import cardBathroom from "@/assets/services/card-bathroom.jpg";
  */
 const AboutHero = () => {
   return (
-    <section className="relative h-[70vh] min-h-[520px] flex items-center overflow-hidden bg-primary">
+    <section className="relative h-[75vh] min-h-[520px] flex items-center overflow-hidden bg-primary">
       {/* Background — static team image */}
       <img
         src="/videos/work-team-pic.png"
         alt="Construction team working together"
-        className="absolute inset-0 w-full h-full object-cover scale-[1.05] rounded-2xl shadow-lg"
+        className="absolute inset-0 w-full h-full object-cover object-top rounded-2xl shadow-lg"
       />
 
       {/* Layer 1 — dark gradient L→R for left-aligned text legibility */}
