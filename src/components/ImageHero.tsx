@@ -14,7 +14,7 @@ const ImageHero = ({ title, subtitle, imageSrc }: ImageHeroProps) => {
       <img
         src={src}
         alt="Professional construction team working together"
-        className="absolute inset-0 w-full h-full object-cover object-top scale-[1.03] transition-transform duration-700"
+        className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-700"
         width={1920}
         height={768}
       />
