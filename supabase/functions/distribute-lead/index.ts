@@ -1,12 +1,32 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+// CORS-TODO: shared origin allowlist. Move to a shared deno module once
+// the edge-function count grows. Wildcard "*" is no longer accepted.
+// SECURITY-TODO: distribute-lead uses service_role internally and trusts
+// the caller-supplied lead_id. Before re-enabling lead submission, require
+// the caller JWT to belong to the same user that submitted the lead, OR
+// invoke this function only from a trusted server-side path (never the
+// public client). Today the client invocation in LeadForm is commented
+// out — keep it that way until the auth model is fixed.
+const ALLOWED_ORIGINS = [
+  "https://buildright-usa.com",
+  "https://www.buildright-usa.com",
+  "http://localhost:5173",
+  "http://localhost:8080",
+];
+function corsHeadersFor(req: Request): Record<string, string> {
+  const origin = req.headers.get("origin") ?? "";
+  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[1];
+  return {
+    "Access-Control-Allow-Origin": allowed,
+    "Vary": "Origin",
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  };
+}
 
 Deno.serve(async (req) => {
+  const corsHeaders = corsHeadersFor(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

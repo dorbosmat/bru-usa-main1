@@ -68,6 +68,12 @@ const LeadForm = ({
     if (!consentChecked) { toast({ title: t.formConsentRequired, variant: "destructive" }); return; }
     if (!isValidUSPhone(form.phone)) { setPhoneError(t.formPhoneError); return; }
     if (honeypot) return;
+    // TURNSTILE-TODO: before re-enabling lead submission, require a Cloudflare
+    // Turnstile token here and forward it in the request body for server-side
+    // verification. Honeypot + phone-shape regex alone will not stop a
+    // motivated abuser once LEAD_SUBMISSION_ENABLED flips back on.
+    // RATE-LIMIT-TODO: also add a server-side per-IP cap (Supabase table) on
+    // the new submit edge function.
 
     // ─────────────────────────────────────────────────────────────────────
     // LEAD-GATE-TODO: Liability Containment Sprint — lead submission is

@@ -1,22 +1,42 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 // ─── Security Configuration ─────────────────────────────────────────────────
-// CORS locked to ALLOWED_ORIGIN env var (never "*" in production)
-// Per-IP rate limiting: 12 req/min (slightly raised for better UX)
-// Message history capped at 20, body size capped at 32KB
-// Error responses never leak internal details
+// CORS-TODO: shared origin allowlist. The previous behavior fell back to
+// "*" if the ALLOWED_ORIGIN secret was unset (and it was unset). Now the
+// allowlist is inline + opt-in only.
+//
+// RATE-LIMIT-TODO: rateLimitMap below is an in-memory Map. Supabase Edge
+// functions run on horizontally-scaled isolates, so each isolate has its
+// own counter — easy to bypass. Move to a Supabase table keyed by IP
+// (with TTL via a partial unique index on a rounded-minute bucket) before
+// relying on this for real abuse protection.
+//
+// TURNSTILE-TODO: even with persistent rate limiting, a determined
+// attacker can rotate IPs cheaply. Add Cloudflare Turnstile token
+// verification on the chat widget and validate it here before forwarding
+// to the paid Lovable AI gateway.
 
-const ALLOWED_ORIGIN = Deno.env.get("ALLOWED_ORIGIN") ?? "*";
+const ALLOWED_ORIGINS = [
+  "https://buildright-usa.com",
+  "https://www.buildright-usa.com",
+  "http://localhost:5173",
+  "http://localhost:8080",
+];
+function corsHeadersFor(req: Request): Record<string, string> {
+  const origin = req.headers.get("origin") ?? "";
+  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[1];
+  return {
+    "Access-Control-Allow-Origin": allowed,
+    "Vary": "Origin",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+  };
+}
+
 const RATE_LIMIT     = 12;
 const WINDOW_MS      = 60_000;
 const MAX_MESSAGES   = 20;
 const MAX_BODY_BYTES = 32_768;
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin":  ALLOWED_ORIGIN,
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
 
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 
@@ -384,6 +404,7 @@ ABSOLUTE RULES — SAFETY, HONESTY, NON-IMPERSONATION
 // ─── Server ──────────────────────────────────────────────────────────────────
 
 serve(async (req) => {
+  const corsHeaders = corsHeadersFor(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

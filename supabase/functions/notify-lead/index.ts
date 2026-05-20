@@ -1,10 +1,28 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+// CORS-TODO: shared origin allowlist. Move to a shared deno module once
+// the edge-function count grows. Wildcard "*" is no longer accepted.
+// SECURITY-TODO: notify-lead currently trusts the caller-supplied lead_id
+// and uses service_role internally. Before re-enabling lead submission,
+// verify the caller is authenticated and the lead_id belongs to that
+// caller (use the user JWT, not the anon key).
+const ALLOWED_ORIGINS = [
+  "https://buildright-usa.com",
+  "https://www.buildright-usa.com",
+  "http://localhost:5173",
+  "http://localhost:8080",
+];
+function corsHeadersFor(req: Request): Record<string, string> {
+  const origin = req.headers.get("origin") ?? "";
+  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[1];
+  return {
+    "Access-Control-Allow-Origin": allowed,
+    "Vary": "Origin",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  };
+}
 
 const EMAIL_CONFIG = {
   primary: "estimate@buildright-usa.com",
@@ -67,6 +85,7 @@ function buildHtml(lead: Record<string, any>): string {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = corsHeadersFor(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 200, headers: corsHeaders });
   }

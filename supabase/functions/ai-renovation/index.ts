@@ -1,10 +1,39 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version",
-};
+// CORS-TODO: shared origin allowlist. Move to a shared deno module once
+// the edge-function count grows. Wildcard "*" is no longer accepted.
+//
+// TURNSTILE-TODO: this endpoint accepts an arbitrary imageUrl and calls
+// the paid Lovable AI gateway with no auth, no rate limit, and no
+// captcha. A single script can drain LOVABLE_API_KEY in minutes — a
+// financial gun pointed at the project's bill. Before exposing this
+// publicly under load, add Cloudflare Turnstile token verification on
+// the client and validate the token in this handler.
+//
+// RATE-LIMIT-TODO: also add a persistent (Supabase-table-backed) per-IP
+// daily cap on generation calls. In-memory Map will NOT work across
+// Supabase Edge isolates (see chat function's broken rate limit for
+// reference).
+//
+// SECURITY-TODO: validate imageUrl host against an allowlist (or accept
+// only blob: / data: from the upload flow) and HEAD-check Content-Length
+// to reject inputs > 10 MB before forwarding to Gemini.
+const ALLOWED_ORIGINS = [
+  "https://buildright-usa.com",
+  "https://www.buildright-usa.com",
+  "http://localhost:5173",
+  "http://localhost:8080",
+];
+function corsHeadersFor(req: Request): Record<string, string> {
+  const origin = req.headers.get("origin") ?? "";
+  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[1];
+  return {
+    "Access-Control-Allow-Origin": allowed,
+    "Vary": "Origin",
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version",
+  };
+}
 
 // ─── Provider Interface ───
 // Each provider implements this shape. To add a new provider,
@@ -194,6 +223,7 @@ class PaymentError extends Error {
 
 // ─── HTTP Handler ───
 serve(async (req) => {
+  const corsHeaders = corsHeadersFor(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

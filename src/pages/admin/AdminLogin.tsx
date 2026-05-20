@@ -19,6 +19,15 @@ export default function AdminLogin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
+    // SECURITY-TODO: this admin login uses Supabase email/password with no
+    // MFA and no IP allowlist on /admin/*. The admin role can read every
+    // homeowner's PII (phone, email, address). Before opening leads to the
+    // public again:
+    //   1. Enable Supabase TOTP MFA and require it for users in the admin role.
+    //   2. Add a Vercel middleware (or edge config) IP allowlist that gates
+    //      every /admin/* path to the office/VPN ranges.
+    //   3. Reduce admin session timeout to <= 4 hours.
+    //   4. Add an audit-log table that every admin write appends to.
     const { error } = await signIn(email, password);
     if (error) {
       toast({ title: "Login failed", description: error.message, variant: "destructive" });
