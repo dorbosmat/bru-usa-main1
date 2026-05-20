@@ -76,12 +76,23 @@ DO $$ BEGIN
   END IF;
 END $$;
 
--- ── 5. SEED: update FAKE_ACTIVITY_ENABLED to false ─────────
--- We now use real Supabase Realtime data. Disable the fake flag.
+-- ── 5. SEED: FAKE_ACTIVITY_ENABLED = false ─────────────────
+-- FAKE-ACTIVITY-TODO: the seed value used to be 'true'::jsonb, which caused
+-- ActivityToast to display "Someone in {city} just requested a quote" pop-ups
+-- on every page even before the Realtime feed had been wired to genuine
+-- post-submission lead activity. The client-side gate REALTIME_ACTIVITY_ENABLED
+-- in src/lib/social-proof-gate.ts is now the authoritative kill switch, but
+-- the DB seed is also flipped to false so any future code path that reads
+-- this flag direct gets the safe default. The UPDATE forces existing rows on
+-- previously-deployed installs back to false too.
 
 INSERT INTO public.site_settings (key, value)
-VALUES ('FAKE_ACTIVITY_ENABLED', 'true'::jsonb)
+VALUES ('FAKE_ACTIVITY_ENABLED', 'false'::jsonb)
 ON CONFLICT (key) DO NOTHING;
+
+UPDATE public.site_settings
+SET value = 'false'::jsonb
+WHERE key = 'FAKE_ACTIVITY_ENABLED' AND value <> 'false'::jsonb;
 
 -- ── 6. ENSURE leads REALTIME IS ENABLED ───────────────────
 -- ActivityToast uses postgres_changes on the leads table.

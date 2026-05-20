@@ -11,14 +11,18 @@ import TrustStrip from "@/components/TrustStrip";
 import WhatHappensNext from "@/components/WhatHappensNext";
 import MaintenanceHoldingState from "@/components/MaintenanceHoldingState";
 import { LEAD_SUBMISSION_ENABLED } from "@/lib/lead-submission-gate";
+import { MATCHING_ANIMATION_ENABLED } from "@/lib/social-proof-gate";
 
 // FIXED: button disabled + spinner on first click (no double-submit)
 // FIXED: idempotency_key on upsert — no duplicate rows on retry
 // ADDED: TrustStrip above submit, WhatHappensNext on success
+// FAKE-ACTIVITY-TODO: the "matching" + "found N pros" phases below used
+// Math.random() to fabricate the contractor count. They are gated by
+// MATCHING_ANIMATION_ENABLED and currently unreachable. When re-enabling, the
+// count must come from a real distribute-lead response — never a random
+// number. See src/lib/social-proof-gate.ts.
 
 type MatchingPhase = "idle" | "submitting" | "matching" | "found" | "done" | "maintenance";
-
-function rand(min: number, max: number) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
 function isValidUSPhone(phone: string): boolean {
   const d = phone.replace(/\D/g, "");
@@ -108,9 +112,17 @@ const LeadForm = ({
     // LEAD-GATE-TODO: notify-lead invocation will move server-side too.
     supabase.functions.invoke("notify-lead", { body: { lead_id: newLeadId } }).then(()=>console.log("notify-lead invoked", newLeadId)).catch((error)=>console.warn("Lead email notification failed", error));
 
-    setPhase("matching");
-    const count = rand(2,4); setProsCount(count);
-    setTimeout(() => { setPhase("found"); setTimeout(() => setPhase("done"), 2000); }, 2000);
+    // FAKE-ACTIVITY-TODO: the "matching" + "found N pros" animation was
+    // fabricated theatre (setProsCount(rand(2,4))). It is now skipped while
+    // MATCHING_ANIMATION_ENABLED is false. When you wire the real
+    // distribute-lead flow, only call setProsCount with the actual matched
+    // contractor count returned by the server.
+    if (MATCHING_ANIMATION_ENABLED) {
+      setPhase("matching");
+      setTimeout(() => { setPhase("found"); setTimeout(() => setPhase("done"), 2000); }, 2000);
+    } else {
+      setPhase("done");
+    }
   };
 
   const handleCallbackRequest = async () => {
@@ -128,7 +140,7 @@ const LeadForm = ({
   const inputClass  = "w-full rounded-md border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring";
   const selectClass = "w-full rounded-md border border-input bg-background px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring";
 
-  if (phase === "submitting" || phase === "matching") {
+  if (phase === "submitting" || (MATCHING_ANIMATION_ENABLED && phase === "matching")) {
     return (
       <div className="bg-card rounded-lg shadow-xl p-6">
         <div className="flex flex-col items-center justify-center py-8 space-y-4 text-center">
@@ -146,7 +158,10 @@ const LeadForm = ({
     );
   }
 
-  if (phase === "found") {
+  // FAKE-ACTIVITY-TODO: the "found N pros" panel below was driven by a
+  // random number. Render branch is gated by MATCHING_ANIMATION_ENABLED so
+  // Rollup tree-shakes it from production while the flag is false.
+  if (MATCHING_ANIMATION_ENABLED && phase === "found") {
     return (
       <div className="bg-card rounded-lg shadow-xl p-6">
         <div className="flex flex-col items-center justify-center py-8 space-y-4 text-center">

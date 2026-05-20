@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 import { MapPin, Quote, Star } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { trackCtaClick } from "@/lib/analytics";
+import { HARDCODED_TESTIMONIALS_ENABLED } from "@/lib/social-proof-gate";
 
 import cardRoofing from "@/assets/services/card-roofing.jpg";
 import cardStormDamage from "@/assets/services/card-storm-damage.jpg";
@@ -19,15 +20,19 @@ import cardGeneralRemodeling from "@/assets/services/card-general-remodeling.jpg
 import cardWindowsDoors from "@/assets/services/card-windows-doors.jpg";
 import cardSiding from "@/assets/services/card-siding.jpg";
 
-const TESTIMONIALS = [
-  { name: "Michael R.", city: "Tampa, FL", text: "Build Right made it super easy. I got multiple roofing quotes within hours.", rating: 5 },
-  { name: "Jessica L.", city: "Orlando, FL", text: "Loved how simple it was. I didn't feel pressured and could compare options.", rating: 5 },
-  { name: "David S.", city: "Miami, FL", text: "Very professional contractors. Way better than calling random companies.", rating: 5 },
-  { name: "Amanda K.", city: "Jacksonville, FL", text: "The contractors were punctual, respectful, and the kitchen looks incredible. Highly recommend!", rating: 5 },
-  { name: "Robert T.", city: "Fort Lauderdale, FL", text: "Got my solar panels installed in 2 weeks. The whole process was smooth from start to finish.", rating: 5 },
-  { name: "Sarah M.", city: "St. Petersburg, FL", text: "After the storm damage, they connected me with a contractor who handled everything including insurance.", rating: 5 },
-  { name: "James W.", city: "Tallahassee, FL", text: "Saved me so much time. Three quality quotes for my bathroom remodel in under 24 hours.", rating: 5 },
-];
+// FAKE-ACTIVITY-TODO: the original TESTIMONIALS block here held seven
+// fabricated all-5★ Florida-only entries written in marketing-intern voice
+// ("Loved how simple it was", "Highly recommend!"). Showing them was deceptive
+// social proof and risked Meta/Google Ads policy enforcement plus FTC Section
+// 5 exposure. The array now ships empty and the section below is gated by
+// HARDCODED_TESTIMONIALS_ENABLED so the entire JSX is tree-shaken from the
+// bundle while the flag is false.
+//
+// When you populate this array later, every entry MUST be a verifiable real
+// review (Google Business Profile, Trustpilot, or first-party with signed
+// permission). Do NOT re-add fabricated entries. Re-enable by flipping
+// HARDCODED_TESTIMONIALS_ENABLED in src/lib/social-proof-gate.ts.
+const TESTIMONIALS: Array<{ name: string; city: string; text: string; rating: number }> = [];
 
 const Index = () => {
   const { t } = useLanguage();
@@ -151,35 +156,42 @@ const Index = () => {
       <ProjectGallery />
 
       {/* Testimonials */}
-      <section className="py-20 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <Premium3DHeading
-              as="h2"
-              variant="section"
-              theme="dark"
-              className="font-display text-3xl md:text-4xl font-bold text-foreground"
-            >
-              {t.testimonialsTitle} <span className="text-accent">{t.testimonialsHighlight}</span>
-            </Premium3DHeading>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map((item) => (
-              <div key={item.name} className="bg-card rounded-lg p-6 shadow-sm border border-border">
-                <Quote size={20} className="text-accent/40 mb-3" />
-                <p className="text-sm text-foreground leading-relaxed mb-4">{item.text}</p>
-                <div className="flex items-center gap-1 mb-2">
-                  {Array.from({ length: item.rating }).map((_, i) => (
-                    <Star key={i} size={14} className="text-accent fill-accent" />
-                  ))}
+      {/* FAKE-ACTIVITY-TODO: section gated by HARDCODED_TESTIMONIALS_ENABLED.
+          While the flag is false (and the TESTIMONIALS array is empty), the
+          entire JSX subtree below is tree-shaken from the bundle so we ship
+          zero fabricated review copy. Re-enable only after wiring real,
+          verifiable reviews. See src/lib/social-proof-gate.ts. */}
+      {HARDCODED_TESTIMONIALS_ENABLED && TESTIMONIALS.length > 0 && (
+        <section className="py-20 bg-background">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <Premium3DHeading
+                as="h2"
+                variant="section"
+                theme="dark"
+                className="font-display text-3xl md:text-4xl font-bold text-foreground"
+              >
+                {t.testimonialsTitle} <span className="text-accent">{t.testimonialsHighlight}</span>
+              </Premium3DHeading>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {TESTIMONIALS.map((item) => (
+                <div key={item.name} className="bg-card rounded-lg p-6 shadow-sm border border-border">
+                  <Quote size={20} className="text-accent/40 mb-3" />
+                  <p className="text-sm text-foreground leading-relaxed mb-4">{item.text}</p>
+                  <div className="flex items-center gap-1 mb-2">
+                    {Array.from({ length: item.rating }).map((_, i) => (
+                      <Star key={i} size={14} className="text-accent fill-accent" />
+                    ))}
+                  </div>
+                  <p className="text-sm font-semibold text-foreground">{item.name}</p>
+                  <p className="text-xs text-muted-foreground">{item.city}</p>
                 </div>
-                <p className="text-sm font-semibold text-foreground">{item.name}</p>
-                <p className="text-xs text-muted-foreground">{item.city}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* FAQ */}
       <section className="py-20 bg-muted">

@@ -2,16 +2,33 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { X, TrendingUp } from "lucide-react";
 import { useLocation } from "react-router-dom";
+import { REALTIME_ACTIVITY_ENABLED } from "@/lib/social-proof-gate";
 
-// FIXED: Uses real Supabase Realtime data — no fake random numbers.
-// Listens for INSERT events on leads table and shows anonymized real activity.
-// Fallback: if no leads arrive in first 8-15s, shows a real aggregate count for today.
+// FAKE-ACTIVITY-TODO: this component used to display "Someone in {city} just
+// requested a {service} quote" toasts. Even when sourced from real Realtime
+// data, the framing implied live homeowner activity that the platform cannot
+// currently substantiate (lead submission is gated off in Task 1; the only
+// rows arriving in the leads table are admin-created). The component is now
+// disabled at the top via REALTIME_ACTIVITY_ENABLED. To re-enable:
+//   1. Wire to a genuine, post-submission lead stream that reflects real
+//      paying-homeowner activity, not seed/admin/test rows.
+//   2. Flip REALTIME_ACTIVITY_ENABLED in src/lib/social-proof-gate.ts.
+//   3. Remove this guard.
 
 function rand(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+// FAKE-ACTIVITY-TODO: hard kill switch — see header comment. The default
+// export resolves to a no-op while REALTIME_ACTIVITY_ENABLED is false, which
+// keeps hooks rules-compliant and lets Rollup tree-shake the implementation
+// entirely.
 export default function ActivityToast() {
+  if (!REALTIME_ACTIVITY_ENABLED) return null;
+  return <ActivityToastImpl />;
+}
+
+function ActivityToastImpl() {
   const [enabled,  setEnabled]  = useState<boolean | null>(null);
   const [visible,  setVisible]  = useState(false);
   const [message,  setMessage]  = useState("");
