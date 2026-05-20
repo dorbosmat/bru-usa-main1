@@ -12,6 +12,9 @@ import TrustStrip from "@/components/TrustStrip";
 import WhatHappensNext from "@/components/WhatHappensNext";
 import MaintenanceHoldingState from "@/components/MaintenanceHoldingState";
 import { LEAD_SUBMISSION_ENABLED } from "@/lib/lead-submission-gate";
+import { submitLeadV1 } from "@/lib/lead-submit-client";
+import { CURRENT_CONSENT } from "@/lib/consent-text";
+import { Link } from "react-router-dom";
 
 const PROJECT_TYPES = ["Roofing","Kitchen Remodel","Bathroom Remodel","Flooring","Painting","Windows & Doors","Concrete","Landscaping","Full Remodel","Other"];
 const BUDGETS = ["Under $5,000","$5,000 - $15,000","$15,000 - $40,000","$40,000 - $100,000","$100,000+"];
@@ -43,6 +46,7 @@ export default function GetQuote() {
     const [submitting, setSubmitting] = useState(false);
     const [done, setDone] = useState(false);
     const [maintenance, setMaintenance] = useState(false);
+    const [consentChecked, setConsentChecked] = useState(false);
     const [submittedName, setSubmittedName] = useState("");
     const [submittedService, setSubmittedService] = useState("");
 
@@ -56,6 +60,10 @@ export default function GetQuote() {
         }
         if (!isValidUSPhone(form.phone)) {
                 setPhoneError(t.formPhoneError);
+                return;
+        }
+        if (!consentChecked) {
+                toast({ title: t.formConsentRequired, variant: "destructive" });
                 return;
         }
         if (honeypot) return;
@@ -72,53 +80,46 @@ export default function GetQuote() {
 
         setSubmitting(true);
 
-        try {
-                const params = new URLSearchParams(window.location.search);
-                const newLeadId = crypto.randomUUID();
+        // Pack budget/timeline/property into the message field — the
+        // leads table doesn't have dedicated columns for those.
+        const extras: string[] = [];
+        if (form.budget_range) extras.push(`Budget: ${form.budget_range}`);
+        if (form.timeline) extras.push(`Timeline: ${form.timeline}`);
+        if (form.property_type) extras.push(`Property: ${form.property_type}`);
+        const composedMessage = [form.notes, extras.length ? `[${extras.join(" | ")}]` : ""].filter(Boolean).join("\n").trim() || undefined;
 
-          // Pack budget/timeline/property into the message field since those columns
-          // do not exist on the leads table. This keeps inserts working while still
-          // capturing the data for the CRM.
-          const extras: string[] = [];
-                if (form.budget_range) extras.push(`Budget: ${form.budget_range}`);
-                if (form.timeline) extras.push(`Timeline: ${form.timeline}`);
-                if (form.property_type) extras.push(`Property: ${form.property_type}`);
-                const composedMessage = [form.notes, extras.length ? `[${extras.join(" | ")}]` : ""].filter(Boolean).join("\n").trim() || null;
-          const insertPayload = { id: newLeadId, name: form.full_name, phone: formatPhone(form.phone), email: form.email, zip: form.zip_code, service: form.project_type, service_area: form.city, message: composedMessage, source: "website" }; console.log("Quote insert payload", insertPayload);
-          const { error } = await supabase.from("leads").insert({
-                    id: newLeadId,
-                    name: form.full_name,
-                    phone: formatPhone(form.phone),
-                    email: form.email,
-                    zip: form.zip_code,
-                    service: form.project_type,
-                    service_area: form.city,
-                    message: composedMessage,
-                    source: "website" as const,
-                    
-                    
-                    
-                    
-          });
+        // LEAD-REOPEN-TODO: post-gate path now uses submit-lead edge function
+        // (Sprint Task 7). Server captures IP / UA / consent / source_url /
+        // writes immutable lead_consent_log row / invokes notify-lead
+        // server-to-server. See src/lib/lead-submit-client.ts.
+        const result = await submitLeadV1({
+                name: form.full_name,
+                phone: form.phone,
+                email: form.email,
+                zip: form.zip_code,
+                service: form.project_type,
+                service_area: form.city,
+                message: composedMessage,
+                honeypot,
+                // TURNSTILE-TODO: pass turnstileToken when widget mounts.
+        });
 
-          if (error) {
-                    console.error("Quote insert failed", error);
-                    toast({ title: t.formError, description: "Please try again.", variant: "destructive" });
-                    setSubmitting(false);
-                    return;
-          }
-          console.log("Quote insert result", error); const notifyId = newLeadId; console.log("Quote notify-lead id", notifyId); supabase.functions.invoke("notify-lead", { body: { lead_id: notifyId } }).then(()=>console.log("notify-lead invoked",notifyId)).catch((e)=>console.warn("Lead email notification failed",e));
-          toast({ title: "Thank you!", description: "Your request was sent successfully. Our team will contact you shortly." });
-                trackLeadConversion(form.project_type, form.zip_code);
-                setSubmittedName(form.full_name);
-                setSubmittedService(form.project_type);
+        if (!result.success) {
+                if (result.maintenance) {
+                        setMaintenance(true);
+                } else {
+                        toast({ title: t.formError, description: "Please try again.", variant: "destructive" });
+                }
                 setSubmitting(false);
-                setDone(true);
-        } catch (err) {
-                console.error("[GetQuote] unexpected error:", err);
-                toast({ title: t.formError, description: "Please try again.", variant: "destructive" });
-                setSubmitting(false);
+                return;
         }
+
+        toast({ title: "Thank you!", description: "Your request was sent successfully. Our team will contact you shortly." });
+        trackLeadConversion(form.project_type, form.zip_code);
+        setSubmittedName(form.full_name);
+        setSubmittedService(form.project_type);
+        setSubmitting(false);
+        setDone(true);
   };
 
   const inputClass = "w-full rounded-md border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring";
@@ -186,6 +187,19 @@ export default function GetQuote() {
                                                     </select>
                                     </div>
                                     <textarea id="quote-notes" name="notes" placeholder={t.getQuoteNotes} value={form.notes} onChange={e=>set("notes",e.target.value)} className={`${inputClass} min-h-[80px]`} maxLength={1000} />
+                                    {/* CONSENT-TODO: consent block sourced from src/lib/consent-text.ts.
+                                        Required by the submit-lead edge function — version + given flag
+                                        are submitted with every lead. */}
+                                    <label className="flex items-start gap-2 cursor-pointer">
+                                                    <input type="checkbox" id="quote-consent" name="consent" checked={consentChecked} onChange={e=>setConsentChecked(e.target.checked)} className="mt-1 accent-accent" />
+                                                    <span className="text-[11px] text-muted-foreground leading-relaxed">
+                                                            {CURRENT_CONSENT.text}{" "}
+                                                            <Link to="/privacy-policy" className="text-accent hover:underline" onClick={e=>e.stopPropagation()}>Privacy Policy</Link>{", "}
+                                                            <Link to="/sms-consent" className="text-accent hover:underline" onClick={e=>e.stopPropagation()}>SMS Consent</Link>{", "}
+                                                            <Link to="/lead-generation-disclosure" className="text-accent hover:underline" onClick={e=>e.stopPropagation()}>Lead Generation Disclosure</Link>{". You also accept our "}
+                                                            <Link to="/terms-of-service" className="text-accent hover:underline" onClick={e=>e.stopPropagation()}>Terms of Service</Link>.
+                                                    </span>
+                                    </label>
                                     <TrustStrip className="py-1" />
                                     <Button type="submit" variant="cta" size="lg" className="w-full" disabled={submitting}>
                                       {submitting ? <><Loader2 className="animate-spin mr-2 h-4 w-4" />{t.formSubmitting}</> : t.getQuoteSubmit}

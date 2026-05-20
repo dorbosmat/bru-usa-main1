@@ -6,6 +6,9 @@ import { Lock, CheckCircle, Loader2 } from "lucide-react";
 import { trackLeadConversion } from "@/lib/analytics";
 import MaintenanceHoldingState from "@/components/MaintenanceHoldingState";
 import { LEAD_SUBMISSION_ENABLED } from "@/lib/lead-submission-gate";
+import { submitLeadV1 } from "@/lib/lead-submit-client";
+import { CURRENT_CONSENT } from "@/lib/consent-text";
+import { Link } from "react-router-dom";
 
 interface LeadCaptureModalProps {
   projectType: string;
@@ -31,6 +34,7 @@ const LeadCaptureModal = ({ projectType, style, onLeadCaptured }: LeadCaptureMod
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [honeypot, setHoneypot] = useState("");
+  const [consentChecked, setConsentChecked] = useState(false);
 
   const inputClass = "w-full rounded-lg border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring";
 
@@ -42,6 +46,10 @@ const LeadCaptureModal = ({ projectType, style, onLeadCaptured }: LeadCaptureMod
     }
     if (!isValidUSPhone(form.phone)) {
       toast({ title: "Please enter a valid US phone number", variant: "destructive" });
+      return;
+    }
+    if (!consentChecked) {
+      toast({ title: "Please agree to the contact terms to continue", variant: "destructive" });
       return;
     }
     if (honeypot) return;
@@ -62,35 +70,31 @@ const LeadCaptureModal = ({ projectType, style, onLeadCaptured }: LeadCaptureMod
 
     setSubmitting(true);
 
-    const params = new URLSearchParams(window.location.search);
-    const newLeadId = crypto.randomUUID();
-    // LEAD-GATE-TODO: replace this insert + notify-lead + distribute-lead +
-    // event_log trio with a single server-side submit edge function call.
-    const { error } = await supabase.from("leads").insert({
-      id: newLeadId,
+    // LEAD-REOPEN-TODO: post-gate path uses submit-lead edge function
+    // (Sprint Task 7). Server captures IP/UA/consent, writes
+    // lead_consent_log, invokes notify-lead server-to-server. distribute-
+    // lead is intentionally paused server-side until real contractors are
+    // onboarded.
+    const result = await submitLeadV1({
       name: form.name,
-      phone: formatPhone(form.phone),
+      phone: form.phone,
       email: form.email,
       zip: form.zip,
       service: projectType,
-      source: "website" as const,
-      landing_page: "/renovation-preview", source_page: window.location.pathname,
+      service_area: form.zip, // AI Preview modal doesn't ask for service_area; pass ZIP as a stand-in
       message: `AI Preview Lead | Style: ${style} | Project: ${projectType}`,
-      utm_source: params.get("utm_source") || null,
-      utm_medium: params.get("utm_medium") || null,
-      utm_campaign: params.get("utm_campaign") || null,
-    } as any);
+      landing_page: "/renovation-preview",
+      honeypot,
+      // TURNSTILE-TODO: pass turnstileToken when widget mounts.
+    });
 
-    if (error) {
-      toast({ title: "Something went wrong", variant: "destructive" });
+    if (!result.success) {
+      if (!result.maintenance) {
+        toast({ title: "Something went wrong", variant: "destructive" });
+      }
       setSubmitting(false);
       return;
     }
-
-    // Trigger email notification + lead distribution
-    supabase.functions.invoke("notify-lead", { body: { lead_id: newLeadId } }).then(() => {});
-    supabase.functions.invoke("distribute-lead", { body: { lead_id: newLeadId } }).then(() => {});
-    supabase.from("event_log").insert({ event_type: "ai_preview_lead", zip: form.zip }).then(() => {});
 
     trackLeadConversion(projectType, form.zip);
     setDone(true);
@@ -137,14 +141,22 @@ const LeadCaptureModal = ({ projectType, style, onLeadCaptured }: LeadCaptureMod
         <input type="email" id="lcm-email" name="email" autoComplete="email" placeholder="Email Address" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={inputClass} maxLength={255} />
         <input type="text" id="lcm-zip" name="zip" autoComplete="postal-code" inputMode="numeric" placeholder="ZIP Code" value={form.zip} onChange={(e) => setForm({ ...form, zip: e.target.value })} className={inputClass} maxLength={10} />
 
+        {/* CONSENT-TODO: required by submit-lead edge function. Sourced
+            from src/lib/consent-text.ts. Replaced the prior one-line
+            "agree to be contacted" copy with the versioned consent text. */}
+        <label className="flex items-start gap-2 cursor-pointer">
+          <input type="checkbox" id="lcm-consent" name="consent" checked={consentChecked} onChange={(e) => setConsentChecked(e.target.checked)} className="mt-1 accent-accent" />
+          <span className="text-[10px] text-muted-foreground leading-relaxed">
+            {CURRENT_CONSENT.text}{" "}
+            <Link to="/privacy-policy" className="text-accent hover:underline" onClick={(e) => e.stopPropagation()}>Privacy Policy</Link>{", "}
+            <Link to="/sms-consent" className="text-accent hover:underline" onClick={(e) => e.stopPropagation()}>SMS Consent</Link>.
+          </span>
+        </label>
+
         <Button type="submit" variant="cta" size="lg" className="w-full" disabled={submitting}>
           {submitting ? <Loader2 className="animate-spin mr-2" size={18} /> : null}
           {submitting ? "Submitting…" : "Unlock Full Preview"}
         </Button>
-
-        <p className="text-[10px] text-center text-muted-foreground">
-          By submitting, you agree to be contacted about your project.
-        </p>
       </form>
     </div>
   );

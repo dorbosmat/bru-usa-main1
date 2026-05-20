@@ -7,6 +7,7 @@ import {
   Phone, Hammer, ChevronDown,
 } from "lucide-react";
 import { LEAD_SUBMISSION_ENABLED } from "@/lib/lead-submission-gate";
+import { submitLeadV1 } from "@/lib/lead-submit-client";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 // ─── Config ──────────────────────────────────────────────────────────────────
@@ -400,11 +401,20 @@ export default function ChatWidget() {
   const submitLead = async (data: LeadData) => {
     // ─────────────────────────────────────────────────────────────────────
     // LEAD-GATE-TODO: Liability Containment Sprint — chatbot lead capture is
-    // temporarily disabled. While LEAD_SUBMISSION_ENABLED is false we do not
-    // write to Supabase, invoke notify-lead, or invoke distribute-lead — we
-    // just acknowledge in chat and stop collecting. Re-enable by replacing
-    // the disabled writes below with a single call to the new server-side
-    // submit edge function. See src/lib/lead-submission-gate.ts.
+    // temporarily disabled. While LEAD_SUBMISSION_ENABLED is false we do
+    // NOT call submitLeadV1 — we just acknowledge in chat and stop
+    // collecting. See src/lib/lead-submission-gate.ts.
+    //
+    // TCPA-TODO: this chat flow does NOT currently include an explicit
+    // consent checkbox / confirmation step (Tasks 1–7 left it gated off
+    // so this gap is safely dormant). Before flipping
+    // LEAD_SUBMISSION_ENABLED to true, ADD a confirmation step right
+    // before submitLeadV1 below: ask the user "before I send this to
+    // Build Right USA, are you OK with them contacting you by phone, SMS
+    // or email about this project?" and require an explicit "yes" reply
+    // — log that exact message in the chat transcript that gets stored
+    // in lead.message. The submit-lead edge function will reject any
+    // payload without consent.given === true.
     // ─────────────────────────────────────────────────────────────────────
     if (!LEAD_SUBMISSION_ENABLED) {
       showBotWithDelay(
@@ -416,41 +426,39 @@ export default function ChatWidget() {
       return;
     }
 
-    const leadId  = crypto.randomUUID();
     const phone   = data.phone.replace(/\D/g, "").slice(-10);
-    const email   = data.email.toLowerCase() === "skip" || !data.email ? null : data.email;
+    const email   = data.email.toLowerCase() === "skip" || !data.email ? "" : data.email;
     const zipVal  = data.zip.replace(/\D/g, "").slice(0, 5);
-    const locFb   = data.location_text || data.service_area || null;
+    const locFb   = data.location_text || data.service_area || "unknown";
 
-    // LEAD-GATE-TODO: replace this insert + notify-lead + distribute-lead
-    // trio with a single server-side submit call.
-    const { error } = await supabase.from("leads").insert({
-      id:           leadId,
-      name:         data.name,
+    // LEAD-REOPEN-TODO: post-gate path uses submit-lead edge function
+    // (Sprint Task 7). Server captures IP/UA/consent/source_url and
+    // writes immutable lead_consent_log row.
+    const result = await submitLeadV1({
+      name: data.name,
       phone,
-      email,
-      zip:          zipVal || "00000",
-      service:      data.service || "General",
+      email: email || `noemail-${Date.now()}@buildright-usa.invalid`,
+      zip: zipVal || "00000",
+      service: data.service || "General",
       service_area: locFb,
-      source:       "website" as const,
-      message:      buildSummary() + (locFb && !zipVal ? ` | Location: ${locFb}` : ""),
+      message: buildSummary() + (locFb && !zipVal ? ` | Location: ${locFb}` : ""),
+      // TURNSTILE-TODO: pass turnstileToken when chat widget integrates it.
     });
 
-    if (error) {
-      showBotWithDelay("Sorry, something went wrong saving your info. Please try again or call us!");
-      console.error("Lead insert error:", error);
+    if (!result.success) {
+      if (result.maintenance) {
+        showBotWithDelay(
+          `Thanks, **${data.name}** — we're temporarily not accepting new requests. Please check back soon.`
+        );
+      } else {
+        showBotWithDelay("Sorry, something went wrong saving your info. Please try again later.");
+        console.warn("Lead submit failed:", result.error);
+      }
     } else {
-      // PHONE-TODO: the success message used to invite the user to "call us
-      // anytime at ${COMPANY_PHONE}" — that constant pointed at a fictional
-      // (555) number. The call-to-call line is removed until a real US line
-      // exists. Re-add a sentence here once COMPANY_PHONE is populated in
-      // src/lib/constants.ts.
       showBotWithDelay(
         `You're all set, **${data.name}**! ✅\n\nA local contractor will reach out soon with a free, no-obligation estimate.`
       );
       setLeadSubmitted(true);
-      supabase.functions.invoke("notify-lead",     { body: { lead_id: leadId } }).catch(() => {});
-      supabase.functions.invoke("distribute-lead", { body: { lead_id: leadId } }).catch(() => {});
     }
     setCollectingLead(false);
     setLeadFieldIdx(0);

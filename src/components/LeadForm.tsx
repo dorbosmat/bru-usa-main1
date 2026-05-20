@@ -12,6 +12,8 @@ import WhatHappensNext from "@/components/WhatHappensNext";
 import MaintenanceHoldingState from "@/components/MaintenanceHoldingState";
 import { LEAD_SUBMISSION_ENABLED } from "@/lib/lead-submission-gate";
 import { MATCHING_ANIMATION_ENABLED } from "@/lib/social-proof-gate";
+import { submitLeadV1 } from "@/lib/lead-submit-client";
+import { CURRENT_CONSENT } from "@/lib/consent-text";
 
 // FIXED: button disabled + spinner on first click (no double-submit)
 // FIXED: idempotency_key on upsert — no duplicate rows on retry
@@ -90,37 +92,46 @@ const LeadForm = ({
     }
 
     setPhase("submitting");
-    const params = new URLSearchParams(window.location.search);
-    const today  = new Date().toISOString().split("T")[0];
-    const newLeadId = crypto.randomUUID();
 
-    // LEAD-GATE-TODO: replace this Supabase insert with the server-side submit
-    // edge function. Direct client-side inserts bypass server validation and
-    // the TCPA consent audit trail.
-    const { error } = await supabase.from("leads").insert({
-      id: newLeadId,
-      name: form.name, phone: formatPhone(form.phone), email: form.email,
-      zip: form.zip, service: form.service, service_area: form.service_area,
-      message: form.details || null, source: "website" as const,
-      utm_source: params.get("utm_source") || null, utm_medium: params.get("utm_medium") || null,
-      utm_campaign: params.get("utm_campaign") || null, utm_term: params.get("utm_term") || null,
-      utm_content: params.get("utm_content") || null,
-      landing_page: landingPage || window.location.pathname, source_page: window.location.pathname,
+    // LEAD-REOPEN-TODO: post-gate path now uses the TCPA-safer submit-lead
+    // edge function (Sprint Task 7). The function: (1) is itself gated by
+    // SUBMIT_LEAD_ENABLED in Supabase secrets so defense-in-depth holds even
+    // if the frontend gate slips, (2) captures IP + user-agent + source URL
+    // + consent version server-side, (3) writes an immutable row to
+    // lead_consent_log, (4) invokes notify-lead server-to-server so the
+    // client never touches it. Direct supabase.insert / Zapier fetch /
+    // client-invoked notify-lead are all removed.
+    const result = await submitLeadV1({
+      name: form.name,
+      phone: form.phone,
+      email: form.email,
+      zip: form.zip,
+      service: form.service,
+      service_area: form.service_area,
+      message: form.details,
+      landing_page: landingPage || window.location.pathname,
+      honeypot,
+      // TURNSTILE-TODO: pass turnstileToken once <TurnstileWidget /> is mounted.
     });
 
-    if (error) { toast({ title: t.formError, variant: "destructive" }); setPhase("idle"); return; }
+    if (!result.success) {
+      if (result.maintenance) {
+        setPhase("maintenance");
+      } else {
+        toast({ title: t.formError, variant: "destructive" });
+        setPhase("idle");
+      }
+      return;
+    }
 
-    setLeadId(newLeadId);
+    setLeadId(result.lead_id ?? null);
     setSubmittedName(form.name);
     setSubmittedService(form.service.replace(/-/g, " "));
-    // LEAD-GATE-TODO: the Zapier webhook URL below is hardcoded in the client
-    // bundle (anyone can flood fake leads). Remove this fetch and route the
-    // notification through the same server-side submit edge function.
-    trackLeadConversion(form.service, form.zip); toast({ title: "Thank you!", description: "Your request was sent successfully. Our team will contact you shortly." }); fetch("https://hooks.zapier.com/hooks/catch/26949764/uv2a9iz/", { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: form.name, phone: formatPhone(form.phone), email: form.email, zip: form.zip, service: form.service, service_area: form.service_area, message: form.details || null, source: "website", source_page: window.location.pathname, landing_page: landingPage || window.location.pathname, created_at: new Date().toISOString() }) }).catch((err) => console.warn("Zapier webhook failed", err));
-    //supabase.from("event_log").insert({ event_type:"form_submitted", zip:form.zip, city:form.service_area }).then(()=>{});
-    //supabase.functions.invoke("distribute-lead", { body:{ lead_id:newLeadId } }).then(()=>{});
-    // LEAD-GATE-TODO: notify-lead invocation will move server-side too.
-    supabase.functions.invoke("notify-lead", { body: { lead_id: newLeadId } }).then(()=>console.log("notify-lead invoked", newLeadId)).catch((error)=>console.warn("Lead email notification failed", error));
+    trackLeadConversion(form.service, form.zip);
+    toast({
+      title: "Thank you!",
+      description: "Your request was sent successfully. Our team will contact you shortly.",
+    });
 
     // FAKE-ACTIVITY-TODO: the "matching" + "found N pros" animation was
     // fabricated theatre (setProsCount(rand(2,4))). It is now skipped while
@@ -225,14 +236,21 @@ const LeadForm = ({
       </select>
       <textarea id="lead-details" name="details" placeholder={t.formProjectDetails} value={form.details} onChange={e=>setForm({...form,details:e.target.value})} className={`${inputClass} min-h-[70px]`} maxLength={1000} />
 
+      {/* CONSENT-TODO: copy below is sourced from src/lib/consent-text.ts
+          (CURRENT_CONSENT). The version key is submitted to the
+          submit-lead edge function so the server can write an
+          authoritative snapshot to lead_consent_log. To change wording,
+          bump the version in consent-text.ts AND the matching entry in
+          supabase/functions/submit-lead/index.ts. Never mutate an
+          existing version's text in place. */}
       <label className="flex items-start gap-2 cursor-pointer">
         <input type="checkbox" id="lead-consent" name="consent" checked={consentChecked} onChange={e=>setConsentChecked(e.target.checked)} className="mt-1 accent-accent" />
         <span className="text-[11px] text-muted-foreground leading-relaxed">
-          By submitting, you agree to be contacted by licensed contractors via phone, email, and SMS. You accept our{" "}
-          <Link to="/terms-of-service" className="text-accent hover:underline" onClick={e=>e.stopPropagation()}>Terms of Service</Link>{" & "}
-          <Link to="/privacy-policy"   className="text-accent hover:underline" onClick={e=>e.stopPropagation()}>Privacy Policy</Link>.
-          Msg & data rates may apply. See our{" "}
-          <Link to="/lead-generation-disclosure" className="text-accent hover:underline" onClick={e=>e.stopPropagation()}>Lead Disclosure</Link>.
+          {CURRENT_CONSENT.text}{" "}
+          <Link to="/privacy-policy"   className="text-accent hover:underline" onClick={e=>e.stopPropagation()}>Privacy Policy</Link>{", "}
+          <Link to="/sms-consent"      className="text-accent hover:underline" onClick={e=>e.stopPropagation()}>SMS Consent</Link>{", "}
+          <Link to="/lead-generation-disclosure" className="text-accent hover:underline" onClick={e=>e.stopPropagation()}>Lead Generation Disclosure</Link>{". You also accept our "}
+          <Link to="/terms-of-service" className="text-accent hover:underline" onClick={e=>e.stopPropagation()}>Terms of Service</Link>.
         </span>
       </label>
 

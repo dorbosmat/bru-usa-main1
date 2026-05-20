@@ -8,6 +8,9 @@ import TrustStrip from "@/components/TrustStrip";
 import WhatHappensNext from "@/components/WhatHappensNext";
 import MaintenanceHoldingState from "@/components/MaintenanceHoldingState";
 import { LEAD_SUBMISSION_ENABLED } from "@/lib/lead-submission-gate";
+import { submitLeadV1 } from "@/lib/lead-submit-client";
+import { CURRENT_CONSENT } from "@/lib/consent-text";
+import { Link } from "react-router-dom";
 
 interface LeadCaptureFormProps {
     previewUrl: string;
@@ -40,6 +43,7 @@ export default function LeadCaptureForm({ previewUrl, projectType, style, onBack
     const [submitting, setSubmitting] = useState(false);
     const [done, setDone] = useState(false);
     const [honeypot, setHoneypot] = useState("");
+    const [consentChecked, setConsentChecked] = useState(false);
     const formRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -57,6 +61,10 @@ export default function LeadCaptureForm({ previewUrl, projectType, style, onBack
         }
         if (!isValidUSPhone(form.phone)) {
                 toast({ title: "Please enter a valid US phone number", variant: "destructive" });
+                return;
+        }
+        if (!consentChecked) {
+                toast({ title: "Please agree to the contact terms to continue", variant: "destructive" });
                 return;
         }
         if (honeypot) return;
@@ -79,47 +87,40 @@ export default function LeadCaptureForm({ previewUrl, projectType, style, onBack
 
         setSubmitting(true);
 
-        try {
-                const params = new URLSearchParams(window.location.search);
-                const zipOrArea = (form.location || "").trim();
-                const isZip = /^\d{5}$/.test(zipOrArea);
-                const newLeadId = crypto.randomUUID();
+        const zipOrArea = (form.location || "").trim();
+        const isZip = /^\d{5}$/.test(zipOrArea);
+        const composedMessage = `AI Preview Lead | Style: ${style || ""} | Project: ${projectType || ""} | Budget: ${budget} | Region: ${region} | Client: ${clientType}${zipOrArea ? ` | Area: ${zipOrArea}` : ""}${personalRequest ? ` | Request: ${personalRequest}` : ""}`;
 
-          // LEAD-GATE-TODO: replace this insert + notify-lead trio with the
-          // server-side submit edge function.
-          const { error } = await supabase.from("leads").insert({
-                    id: newLeadId,
-                    name: form.name.trim(),
-                    phone: formatPhone(form.phone),
-                    email: form.email.trim(),
-                    zip: isZip ? zipOrArea : "00000",
-                    service: projectType || "general",
-                    source: "website",
-                    service_area: !isZip ? (zipOrArea || null) : null,
-                    landing_page: "/renovation-preview", source_page: "/renovation-preview", region: region || null, budget_range: budget || null, client_type: clientType || null, notes: personalRequest || null,
-                    message: `AI Preview Lead | Style: ${style || ""} | Project: ${projectType || ""} | Budget: ${budget} | Region: ${region} | Client: ${clientType}${zipOrArea ? ` | Area: ${zipOrArea}` : ""}${personalRequest ? ` | Request: ${personalRequest}` : ""}`,
-                    utm_source: params.get("utm_source") ?? null,
-                    utm_medium: params.get("utm_medium") ?? null,
-                    utm_campaign: params.get("utm_campaign") ?? null,
-          } as any);
+        // LEAD-REOPEN-TODO: post-gate path uses submit-lead edge function
+        // (Sprint Task 7). Includes consent + IP + UA + source_url + writes
+        // lead_consent_log. notify-lead is invoked server-to-server.
+        const result = await submitLeadV1({
+                name: form.name.trim(),
+                phone: form.phone,
+                email: form.email.trim(),
+                zip: isZip ? zipOrArea : "00000",
+                service: projectType || "general",
+                service_area: !isZip && zipOrArea ? zipOrArea : (region || "unknown"),
+                message: composedMessage,
+                landing_page: "/renovation-preview",
+                source_page: "/renovation-preview",
+                honeypot,
+                // TURNSTILE-TODO: pass turnstileToken when widget mounts.
+        });
 
-          if (error) {
-                    console.error("[LeadCaptureForm] insert error:", error);
-                    toast({ title: "Something went wrong", description: "Please try again.", variant: "destructive" });
-                    setSubmitting(false);
-                    return;
-          }
-
-          toast({ title: "Thank you!", description: "Your request was sent successfully. Our team will contact you shortly." });
-                supabase.functions.invoke("notify-lead", { body: { lead_id: newLeadId } }).then(() => console.log("AI Preview notify-lead invoked", newLeadId)).catch((error) => console.warn("AI Preview email notification failed", error)); trackLeadConversion(projectType || "renovation", zipOrArea);
-                setDone(true);
+        if (!result.success) {
+                if (!result.maintenance) {
+                        toast({ title: "Something went wrong", description: "Please try again.", variant: "destructive" });
+                }
                 setSubmitting(false);
-                setTimeout(() => onLeadCaptured(budget, region, clientType, personalRequest), 1800);
-        } catch (err) {
-                console.error("[LeadCaptureForm] unexpected error:", err);
-                toast({ title: "Something went wrong", description: "Please try again.", variant: "destructive" });
-                setSubmitting(false);
+                return;
         }
+
+        toast({ title: "Thank you!", description: "Your request was sent successfully. Our team will contact you shortly." });
+        trackLeadConversion(projectType || "renovation", zipOrArea);
+        setDone(true);
+        setSubmitting(false);
+        setTimeout(() => onLeadCaptured(budget, region, clientType, personalRequest), 1800);
   };
 
   if (done) return (
@@ -228,7 +229,19 @@ export default function LeadCaptureForm({ previewUrl, projectType, style, onBack
                         </div>
                 
                         <TrustStrip layout="vertical" className="px-1 py-1" />
-                
+
+                        {/* CONSENT-TODO: required by submit-lead edge function. Version is
+                            sourced from src/lib/consent-text.ts. */}
+                        <label className="flex items-start gap-2 cursor-pointer">
+                                  <input type="checkbox" id="lcf-consent" name="consent" checked={consentChecked} onChange={e=>setConsentChecked(e.target.checked)} className="mt-1 accent-accent" />
+                                  <span className="text-[11px] text-muted-foreground leading-relaxed">
+                                              {CURRENT_CONSENT.text}{" "}
+                                              <Link to="/privacy-policy" className="text-accent hover:underline" onClick={e=>e.stopPropagation()}>Privacy Policy</Link>{", "}
+                                              <Link to="/sms-consent" className="text-accent hover:underline" onClick={e=>e.stopPropagation()}>SMS Consent</Link>{", "}
+                                              <Link to="/lead-generation-disclosure" className="text-accent hover:underline" onClick={e=>e.stopPropagation()}>Lead Generation Disclosure</Link>.
+                                  </span>
+                        </label>
+
                         <Button type="submit" variant="cta" size="lg" className="w-full text-base py-4" disabled={submitting}>
                           {submitting ? (<><Loader2 className="animate-spin mr-2" size={18} />Submitting…</>) : (<><Sparkles size={16} className="mr-2" />Show My Renovation Preview</>)}
                         </Button>
