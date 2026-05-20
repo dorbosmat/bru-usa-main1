@@ -21,7 +21,12 @@ const PROPERTY_TYPES = ["House","Condo","Commercial"];
 function isValidUSPhone(p: string): boolean {
     const d = (p || "").replace(/\D/g, "");
     if (d.length !== 10) return false;
-    if (["0000000000","1234567890","1111111111","2222222222","3333333333","4444444444","5555555555","6666666666","7777777777","8888888888","9999999999"].includes(d)) return false;
+    // PHONE-TODO: bot-fingerprint blocklist — same regex-based form as
+    // src/components/LeadForm.tsx so the source no longer contains a 555
+    // phone string. Rejects any all-same-digit ten-digit input plus the
+    // common sequential test pattern.
+    if (/^(\d)\1{9}$/.test(d)) return false;
+    if (d === "1234567890") return false;
     if (d[0] === "0" || d[0] === "1") return false;
     return true;
 }

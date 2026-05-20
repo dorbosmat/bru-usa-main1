@@ -6,7 +6,6 @@ import {
   MessageCircle, X, Send, ArrowLeft,
   Phone, Hammer, ChevronDown,
 } from "lucide-react";
-import { COMPANY_PHONE } from "@/lib/constants";
 import { LEAD_SUBMISSION_ENABLED } from "@/lib/lead-submission-gate";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -207,20 +206,18 @@ function ErrorCTA() {
       <div className="bg-amber-50 border border-amber-200 rounded-2xl rounded-bl-md px-4 py-3 max-w-[85%] space-y-2">
         <p className="text-xs font-semibold text-amber-900">Trouble connecting right now</p>
         <p className="text-xs text-amber-800 leading-relaxed">
-          Reach us directly and we'll get you a quote right away.
+          You can still reach us through the contact page.
         </p>
         <div className="flex gap-2 pt-0.5">
+          {/* PHONE-TODO: this fallback used to render a "Call Now" button
+              linking to an Israeli WhatsApp number (wa.me/972…). Removed for
+              Task 3. Re-introduce a tel: link to a real US callback line
+              once provisioned (COMPANY_PHONE in src/lib/constants.ts). */}
           <a
-            href="https://wa.me/972503721520?text=Hi%2C%20I%20saw%20your%20website%20and%20want%20a%20quote" target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp"
-            className="flex-1 flex items-center justify-center gap-1 bg-accent text-accent-foreground rounded-lg py-1.5 text-xs font-semibold hover:opacity-90"
-          >
-            <Phone size={11} /> Call Now
-          </a>
-          <a
-            href="/get-a-quote"
+            href="/contact"
             className="flex-1 flex items-center justify-center gap-1 bg-muted text-foreground rounded-lg py-1.5 text-xs font-medium hover:bg-muted/80"
           >
-            Get Quote
+            Contact Us
           </a>
         </div>
       </div>
@@ -440,8 +437,13 @@ export default function ChatWidget() {
       showBotWithDelay("Sorry, something went wrong saving your info. Please try again or call us!");
       console.error("Lead insert error:", error);
     } else {
+      // PHONE-TODO: the success message used to invite the user to "call us
+      // anytime at ${COMPANY_PHONE}" — that constant pointed at a fictional
+      // (555) number. The call-to-call line is removed until a real US line
+      // exists. Re-add a sentence here once COMPANY_PHONE is populated in
+      // src/lib/constants.ts.
       showBotWithDelay(
-        `You're all set, **${data.name}**! ✅\n\nA local contractor will reach out soon with a free, no-obligation estimate.\n\nFeel free to call us anytime at **${COMPANY_PHONE}** if you need something faster.`
+        `You're all set, **${data.name}**! ✅\n\nA local contractor will reach out soon with a free, no-obligation estimate.`
       );
       setLeadSubmitted(true);
       supabase.functions.invoke("notify-lead",     { body: { lead_id: leadId } }).catch(() => {});
@@ -604,7 +606,10 @@ addMsg("bot", cleanReply, qr);
         {
           id:      crypto.randomUUID(),
           from:    "bot",
-          text:    `Having trouble connecting right now. You can call us at **${COMPANY_PHONE}** or use the button below.`,
+          // PHONE-TODO: previously offered "${COMPANY_PHONE}" (a fictional
+          // (555) number) as the fallback contact path. Restore a real US
+          // number here once provisioned.
+          text:    `Having trouble connecting right now. Please use the contact form or email us.`,
           isError: true,
         },
       ]);

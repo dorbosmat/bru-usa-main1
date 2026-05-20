@@ -1,13 +1,12 @@
-import { MessageCircle } from "lucide-react";
-
-const WHATSAPP_NUMBER = "972503721520";
-const PREFILLED_MESSAGE = "Hi BuildRight USA, I would like to get a free estimate.";
-
+// PHONE-TODO: this floating button used to deep-link into an Israeli WhatsApp
+// number (wa.me/972…) as the primary "talk to us now" CTA. That number is not
+// a US contact path and was deceptive on a "USA" brand. The button is now a
+// no-op render until a real US contact path (US phone tel: link, US-based
+// SMS, or US-registered WhatsApp Business with a +1 number) is provisioned.
+//
+// To re-enable: replace the body of this default export with the new CTA
+// (ideally a `tel:` to COMPANY_PHONE from src/lib/constants.ts) and remove
+// this guard.
 export default function WhatsAppButton() {
-    const href = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(PREFILLED_MESSAGE);
-    return (
-          <a href={href} target="_blank" rel="noopener noreferrer" aria-label="Chat with BuildRight USA on WhatsApp" className="fixed bottom-[76px] md:bottom-5 right-5 z-50 flex items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg hover:scale-105 transition-transform duration-200 w-14 h-14 md:w-16 md:h-16">
-                <MessageCircle className="w-7 h-7 md:w-8 md:h-8" aria-hidden="true" />
-              </a>
-        );
+  return null;
 }

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { COMPANY_PHONE, COMPANY_EMAIL, COMPANY_ADDRESS, SERVICE_AREAS } from "@/lib/constants";
-import { Phone, Mail, MapPin, Menu, X } from "lucide-react";
+import { COMPANY_EMAIL, COMPANY_ADDRESS, SERVICE_AREAS } from "@/lib/constants";
+import { Mail, MapPin, Menu, X } from "lucide-react";
 import ChatWidget from "@/components/ChatWidget";
 import ActivityToast from "@/components/ActivityToast";
 import CookieConsent from "@/components/CookieConsent";
@@ -101,8 +101,12 @@ const Footer = () => {
           <div>
             <h4 className="font-display font-bold mb-3">{t.footerContactUs}</h4>
             <div className="space-y-2 text-sm text-primary-foreground/70">
-              <div className="flex items-center gap-2"><a href="https://wa.me/972503721520?text=Hi%2C%20I%20saw%20your%20website%20and%20want%20a%20quote" target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp" title="Chat with us on WhatsApp" className="inline-flex"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="#25D366" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 2.1.55 4.15 1.6 5.96L2 22l4.25-1.11a9.9 9.9 0 0 0 5.79 1.85h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.83 9.83 0 0 0 12.04 2zm5.81 14.13c-.25.69-1.41 1.32-1.97 1.41-.5.07-1.13.1-1.83-.12-.42-.13-.96-.31-1.66-.61-2.92-1.26-4.83-4.2-4.97-4.39-.15-.19-1.19-1.58-1.19-3.01 0-1.43.75-2.13 1.02-2.42.27-.29.59-.36.79-.36h.57c.18 0 .43-.07.67.51.25.6.84 2.07.91 2.22.07.15.12.32.02.51-.1.19-.15.31-.3.48-.15.17-.31.38-.45.51-.15.15-.3.31-.13.6.17.29.76 1.25 1.63 2.03 1.12 1 2.07 1.31 2.36 1.46.29.15.46.12.63-.07.17-.19.72-.84.91-1.13.19-.29.39-.24.65-.15.27.1 1.71.81 2 .96.29.15.49.22.56.34.07.13.07.74-.18 1.43z"/></svg></a></div>
-              <div className="flex items-center gap-2"><Mail size={14} /> {COMPANY_EMAIL}</div>
+              {/* PHONE-TODO: footer previously rendered an Israeli WhatsApp
+                  deep-link (wa.me/972…) as the only "Phone:" affordance. Email
+                  is the public contact path until a real US callback line is
+                  provisioned. Then re-add a <tel:> link sourced from
+                  COMPANY_PHONE in src/lib/constants.ts. */}
+              <div className="flex items-center gap-2"><Mail size={14} /> <a href={`mailto:${COMPANY_EMAIL}`} className="hover:text-accent transition-colors">{COMPANY_EMAIL}</a></div>
               <div className="flex items-center gap-2"><MapPin size={14} /> <a href="https://www.google.com/maps/search/?api=1&query=11401+NW+12th+St,+Miami,+FL+33172" target="_blank" rel="noopener noreferrer" aria-label="Open address in Google Maps" title="Open in Google Maps" className="hover:text-accent transition-colors underline-offset-2 hover:underline">{COMPANY_ADDRESS}</a></div>
             </div>
           </div>

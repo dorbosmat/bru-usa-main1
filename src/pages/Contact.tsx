@@ -13,25 +13,13 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
 
-const WHATSAPP_URL =
-  "https://wa.me/972503721520?text=Hi%2C%20I%20saw%20your%20website%20and%20want%20a%20quote";
+// PHONE-TODO: removed Israeli WhatsApp URL + WhatsApp glyph that were
+// rendered as the primary "Or reach out directly" CTA on the contact page.
+// When a US contact path is provisioned, re-add a real tel: link sourced
+// from COMPANY_PHONE in src/lib/constants.ts.
 
 const ADDRESS_MAP_URL =
   "https://www.google.com/maps/search/?api=1&query=11401+NW+12th+St,+Miami,+FL+33172";
-
-// Inline WhatsApp glyph (uses currentColor so it tints with text-emerald-600)
-const WhatsAppIcon = ({ size = 18 }: { size?: number }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="currentColor"
-    aria-hidden="true"
-  >
-    <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 2.1.55 4.15 1.6 5.96L2 22l4.25-1.11a9.9 9.9 0 0 0 5.79 1.85h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.83 9.83 0 0 0 12.04 2zm5.81 14.13c-.25.69-1.41 1.32-1.97 1.41-.5.07-1.13.1-1.83-.12-.42-.13-.96-.31-1.66-.61-2.92-1.26-4.83-4.2-4.97-4.39-.15-.19-1.19-1.58-1.19-3.01 0-1.43.75-2.13 1.02-2.42.27-.29.59-.36.79-.36h.57c.18 0 .43-.07.67.51.25.6.84 2.07.91 2.22.07.15.12.32.02.51-.1.19-.15.31-.3.48-.15.17-.31.38-.45.51-.15.15-.3.31-.13.6.17.29.76 1.25 1.63 2.03 1.12 1 2.07 1.31 2.36 1.46.29.15.46.12.63-.07.17-.19.72-.84.91-1.13.19-.29.39-.24.65-.15.27.1 1.71.81 2 .96.29.15.49.22.56.34.07.13.07.74-.18 1.43z" />
-  </svg>
-);
 
 const Contact = () => {
   const { t } = useLanguage();
@@ -197,26 +185,11 @@ const Contact = () => {
 
             {/* Alternative contact — secondary, subdued, 2×2 grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {/* WhatsApp */}
-              <a
-                href={WHATSAPP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Chat with us on WhatsApp"
-                className="group flex items-center gap-3 rounded-xl bg-card ring-1 ring-border px-4 py-3 motion-safe:transition-all motion-safe:duration-300 motion-safe:hover:ring-emerald-500/50 motion-safe:hover:shadow-md motion-safe:hover:-translate-y-0.5"
-              >
-                <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 ring-1 ring-emerald-500/25">
-                  <WhatsAppIcon size={18} />
-                </span>
-                <div className="min-w-0">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">
-                    WhatsApp
-                  </div>
-                  <div className="text-sm font-semibold text-foreground truncate">
-                    Chat with us
-                  </div>
-                </div>
-              </a>
+              {/* PHONE-TODO: the WhatsApp card that used to occupy the first
+                  slot deep-linked into an Israeli number (wa.me/972…). It was
+                  removed for Task 3. When a US contact path is provisioned,
+                  re-introduce a card here that points to a real US tel: link
+                  sourced from COMPANY_PHONE in src/lib/constants.ts. */}
 
               {/* Email */}
               <a

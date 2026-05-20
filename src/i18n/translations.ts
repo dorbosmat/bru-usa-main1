@@ -261,7 +261,7 @@ export const translations: Record<Language, TranslationKeys> = {
 
     formTitle: "Get Your Free Estimate",
     formFullName: "Full Name",
-    formPhone: "Phone Number — (555) 123-4567",
+    formPhone: "Phone Number",
     formEmail: "Email Address",
     formZip: "ZIP Code",
     formSelectArea: "Select Service Area",
@@ -424,7 +424,7 @@ export const translations: Record<Language, TranslationKeys> = {
 
     formTitle: "Obtén tu cotización gratis",
     formFullName: "Nombre completo",
-    formPhone: "Número de teléfono — (555) 123-4567",
+    formPhone: "Número de teléfono",
     formEmail: "Correo electrónico",
     formZip: "Código postal",
     formSelectArea: "Selecciona área de servicio",

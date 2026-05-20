@@ -5,7 +5,7 @@
  */
 
 import { matchServiceKnowledge, type ServiceKnowledge } from "@/lib/chatbot-knowledge";
-import { COMPANY_PHONE, SERVICE_AREAS } from "@/lib/constants";
+import { SERVICE_AREAS } from "@/lib/constants";
 
 // ─── Pre-defined Q&A (common questions with clear answers + CTA) ───
 
@@ -156,7 +156,12 @@ export function getGuidedPrompt(state: GuidedFlowState): string {
       const urgencyLabel = state.answers.urgency || "";
       const isUrgent = urgencyLabel.toLowerCase().includes("emergency") || urgencyLabel.toLowerCase().includes("asap") || urgencyLabel.toLowerCase().includes("red") || urgencyLabel.toLowerCase().includes("today");
       if (isUrgent) {
-        return `That's definitely something you want to fix quickly ⚠️\n\nI can connect you with a **local ${serviceName.toLowerCase()} expert** who can take a look ASAP.\n\nWant me to set up a **free quote**? It only takes 30 seconds!\n\nOr call us directly: **${COMPANY_PHONE}**`;
+        // PHONE-TODO: the urgent branch used to append
+        // "Or call us directly: ${COMPANY_PHONE}" — that constant pointed at
+        // a fictional (555) number, which was dangerous in an emergency
+        // context (active leak, structural damage). Re-add a real US line
+        // once COMPANY_PHONE is populated in src/lib/constants.ts.
+        return `That's definitely something you want to fix quickly ⚠️\n\nI can connect you with a **local ${serviceName.toLowerCase()} expert** who can take a look ASAP.\n\nWant me to set up a **free quote**? It only takes 30 seconds!`;
       }
       return `I can get you a **free quote** from a trusted local contractor in your area.\n\nIt only takes a few seconds — want me to set that up for you? 😊\n\nJust say **"yes"** or **"get an estimate"**!`;
     }

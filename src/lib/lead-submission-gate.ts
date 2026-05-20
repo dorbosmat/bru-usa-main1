@@ -33,11 +33,12 @@ export const MAINTENANCE_MESSAGE =
 
 export const MAINTENANCE_HEADLINE = "We're upgrading our contractor network";
 
-// TODO(LEAD-GATE-TODO): Provision real US callback line (OpenPhone / Twilio)
-// and replace both constants below. CALLBACK_PHONE_E164 must be in E.164
-// format ("+15551234567") so `tel:` links work cross-platform.
-// While CALLBACK_PHONE_E164 is empty, MaintenanceHoldingState renders a
-// "Phone line being provisioned" notice instead of a live tap-to-call.
-export const CALLBACK_PHONE_E164 = "";                  // e.g. "+18135550123"
-export const CALLBACK_PHONE_DISPLAY = "";               // e.g. "(813) 555-0123"
+// PHONE-TODO: Provision real US callback line (OpenPhone / Twilio) and fill
+// both constants below. CALLBACK_PHONE_E164 must be in E.164 format (leading
+// "+1" then ten digits) so `tel:` links work cross-platform. While the value
+// is empty, MaintenanceHoldingState renders a "Phone line being provisioned"
+// notice instead of a live tap-to-call. Format example: "+1XXXXXXXXXX" /
+// "(XXX) XXX-XXXX" — never use a fictional Hollywood placeholder number.
+export const CALLBACK_PHONE_E164 = "";                  // E.164, e.g. +1<area><exchange><line>
+export const CALLBACK_PHONE_DISPLAY = "";               // Pretty US format, e.g. (XXX) XXX-XXXX
 export const CALLBACK_HOURS = "Mon–Fri · 8AM–6PM EST";

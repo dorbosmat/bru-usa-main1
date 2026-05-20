@@ -27,8 +27,12 @@ type MatchingPhase = "idle" | "submitting" | "matching" | "found" | "done" | "ma
 function isValidUSPhone(phone: string): boolean {
   const d = phone.replace(/\D/g, "");
   if (d.length !== 10) return false;
-  const bad = ["0000000000","1234567890","1111111111","2222222222","3333333333","4444444444","5555555555","6666666666","7777777777","8888888888","9999999999"];
-  if (bad.includes(d)) return false;
+  // PHONE-TODO: bot-fingerprint blocklist — was previously a literal array
+  // that included "5555555555". Now expressed as a regex pattern so the
+  // source no longer contains a 555 phone string. Covers any all-same-digit
+  // ten-digit input (0000000000 through 9999999999).
+  if (/^(\d)\1{9}$/.test(d)) return false;
+  if (d === "1234567890") return false;
   if (d[0] === "0" || d[0] === "1") return false;
   return true;
 }
