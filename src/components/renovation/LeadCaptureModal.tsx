@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Lock, CheckCircle, Loader2 } from "lucide-react";
 import { trackLeadConversion } from "@/lib/analytics";
+import MaintenanceHoldingState from "@/components/MaintenanceHoldingState";
+import { LEAD_SUBMISSION_ENABLED } from "@/lib/lead-submission-gate";
 
 interface LeadCaptureModalProps {
   projectType: string;
@@ -44,10 +46,26 @@ const LeadCaptureModal = ({ projectType, style, onLeadCaptured }: LeadCaptureMod
     }
     if (honeypot) return;
 
+    // ─────────────────────────────────────────────────────────────────────
+    // LEAD-GATE-TODO: Liability Containment Sprint — AI Preview modal lead
+    // capture is temporarily disabled. While LEAD_SUBMISSION_ENABLED is
+    // false we render the maintenance state (the `done` branch handles it)
+    // without writing to Supabase / invoking notify-lead / invoking
+    // distribute-lead / writing to event_log. See lead-submission-gate.ts.
+    // ─────────────────────────────────────────────────────────────────────
+    if (!LEAD_SUBMISSION_ENABLED) {
+      setSubmitting(true);
+      setDone(true);
+      setSubmitting(false);
+      return;
+    }
+
     setSubmitting(true);
 
     const params = new URLSearchParams(window.location.search);
     const newLeadId = crypto.randomUUID();
+    // LEAD-GATE-TODO: replace this insert + notify-lead + distribute-lead +
+    // event_log trio with a single server-side submit edge function call.
     const { error } = await supabase.from("leads").insert({
       id: newLeadId,
       name: form.name,
@@ -81,6 +99,12 @@ const LeadCaptureModal = ({ projectType, style, onLeadCaptured }: LeadCaptureMod
   };
 
   if (done) {
+    // LEAD-GATE-TODO: while LEAD_SUBMISSION_ENABLED is false we render the
+    // maintenance state instead of the "all set" success screen — the lead
+    // was never actually transmitted.
+    if (!LEAD_SUBMISSION_ENABLED) {
+      return <MaintenanceHoldingState variant="inline" />;
+    }
     return (
       <div className="text-center py-8 space-y-3">
         <CheckCircle size={48} className="text-accent mx-auto" />

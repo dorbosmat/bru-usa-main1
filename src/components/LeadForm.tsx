@@ -9,12 +9,14 @@ import { useLanguage } from "@/i18n/LanguageContext";
 import { trackLeadConversion } from "@/lib/analytics";
 import TrustStrip from "@/components/TrustStrip";
 import WhatHappensNext from "@/components/WhatHappensNext";
+import MaintenanceHoldingState from "@/components/MaintenanceHoldingState";
+import { LEAD_SUBMISSION_ENABLED } from "@/lib/lead-submission-gate";
 
 // FIXED: button disabled + spinner on first click (no double-submit)
 // FIXED: idempotency_key on upsert — no duplicate rows on retry
 // ADDED: TrustStrip above submit, WhatHappensNext on success
 
-type MatchingPhase = "idle" | "submitting" | "matching" | "found" | "done";
+type MatchingPhase = "idle" | "submitting" | "matching" | "found" | "done" | "maintenance";
 
 function rand(min: number, max: number) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
@@ -59,11 +61,28 @@ const LeadForm = ({
     if (!isValidUSPhone(form.phone)) { setPhoneError(t.formPhoneError); return; }
     if (honeypot) return;
 
+    // ─────────────────────────────────────────────────────────────────────
+    // LEAD-GATE-TODO: Liability Containment Sprint — lead submission is
+    // temporarily disabled. When LEAD_SUBMISSION_ENABLED is false we render
+    // <MaintenanceHoldingState /> instead of writing to Supabase, posting to
+    // the Zapier webhook, or invoking notify-lead. Re-enable by replacing the
+    // disabled writes below with a single call to the new server-side submit
+    // edge function (TCPA-compliant consent log + Turnstile + rate limit).
+    // See src/lib/lead-submission-gate.ts.
+    // ─────────────────────────────────────────────────────────────────────
+    if (!LEAD_SUBMISSION_ENABLED) {
+      setPhase("maintenance");
+      return;
+    }
+
     setPhase("submitting");
     const params = new URLSearchParams(window.location.search);
     const today  = new Date().toISOString().split("T")[0];
     const newLeadId = crypto.randomUUID();
 
+    // LEAD-GATE-TODO: replace this Supabase insert with the server-side submit
+    // edge function. Direct client-side inserts bypass server validation and
+    // the TCPA consent audit trail.
     const { error } = await supabase.from("leads").insert({
       id: newLeadId,
       name: form.name, phone: formatPhone(form.phone), email: form.email,
@@ -80,9 +99,13 @@ const LeadForm = ({
     setLeadId(newLeadId);
     setSubmittedName(form.name);
     setSubmittedService(form.service.replace(/-/g, " "));
+    // LEAD-GATE-TODO: the Zapier webhook URL below is hardcoded in the client
+    // bundle (anyone can flood fake leads). Remove this fetch and route the
+    // notification through the same server-side submit edge function.
     trackLeadConversion(form.service, form.zip); toast({ title: "Thank you!", description: "Your request was sent successfully. Our team will contact you shortly." }); fetch("https://hooks.zapier.com/hooks/catch/26949764/uv2a9iz/", { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: form.name, phone: formatPhone(form.phone), email: form.email, zip: form.zip, service: form.service, service_area: form.service_area, message: form.details || null, source: "website", source_page: window.location.pathname, landing_page: landingPage || window.location.pathname, created_at: new Date().toISOString() }) }).catch((err) => console.warn("Zapier webhook failed", err));
     //supabase.from("event_log").insert({ event_type:"form_submitted", zip:form.zip, city:form.service_area }).then(()=>{});
     //supabase.functions.invoke("distribute-lead", { body:{ lead_id:newLeadId } }).then(()=>{});
+    // LEAD-GATE-TODO: notify-lead invocation will move server-side too.
     supabase.functions.invoke("notify-lead", { body: { lead_id: newLeadId } }).then(()=>console.log("notify-lead invoked", newLeadId)).catch((error)=>console.warn("Lead email notification failed", error));
 
     setPhase("matching");
@@ -146,6 +169,12 @@ const LeadForm = ({
         resetLabel={t.formSubmitAnother}
       />
     );
+  }
+
+  // LEAD-GATE-TODO: maintenance branch — shown while LEAD_SUBMISSION_ENABLED
+  // is false. Delete this branch when the server-side submit flow ships.
+  if (phase === "maintenance") {
+    return <MaintenanceHoldingState />;
   }
 
   return (

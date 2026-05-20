@@ -10,6 +10,8 @@ import { useLanguage } from "@/i18n/LanguageContext";
 import { trackLeadConversion } from "@/lib/analytics";
 import TrustStrip from "@/components/TrustStrip";
 import WhatHappensNext from "@/components/WhatHappensNext";
+import MaintenanceHoldingState from "@/components/MaintenanceHoldingState";
+import { LEAD_SUBMISSION_ENABLED } from "@/lib/lead-submission-gate";
 
 const PROJECT_TYPES = ["Roofing","Kitchen Remodel","Bathroom Remodel","Flooring","Painting","Windows & Doors","Concrete","Landscaping","Full Remodel","Other"];
 const BUDGETS = ["Under $5,000","$5,000 - $15,000","$15,000 - $40,000","$40,000 - $100,000","$100,000+"];
@@ -35,6 +37,7 @@ export default function GetQuote() {
     const [phoneError, setPhoneError] = useState("");
     const [submitting, setSubmitting] = useState(false);
     const [done, setDone] = useState(false);
+    const [maintenance, setMaintenance] = useState(false);
     const [submittedName, setSubmittedName] = useState("");
     const [submittedService, setSubmittedService] = useState("");
 
@@ -51,6 +54,16 @@ export default function GetQuote() {
                 return;
         }
         if (honeypot) return;
+
+        // ─────────────────────────────────────────────────────────────────
+        // LEAD-GATE-TODO: Liability Containment Sprint — lead submission is
+        // temporarily disabled. Re-enable by routing through the new
+        // server-side submit edge function. See lead-submission-gate.ts.
+        // ─────────────────────────────────────────────────────────────────
+        if (!LEAD_SUBMISSION_ENABLED) {
+                setMaintenance(true);
+                return;
+        }
 
         setSubmitting(true);
 
@@ -125,7 +138,11 @@ export default function GetQuote() {
                                             </div>
                                 </div>
                       
-                        {done ? (
+                        {maintenance ? (
+                      // LEAD-GATE-TODO: maintenance branch — remove when the
+                      // server-side submit flow ships.
+                      <MaintenanceHoldingState />
+                    ) : done ? (
                       <WhatHappensNext name={submittedName} service={submittedService}
                                       onReset={() => { setDone(false); setForm({full_name:"",phone:"",email:"",city:"",zip_code:"",project_type:"",budget_range:"",timeline:"",property_type:"",notes:""}); setSubmittedName(""); setSubmittedService(""); }}
                                       resetLabel={t.formSubmitAnother} />

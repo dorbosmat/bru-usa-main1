@@ -6,6 +6,8 @@ import { ArrowLeft, Loader2, Sparkles } from "lucide-react";
 import { trackLeadConversion } from "@/lib/analytics";
 import TrustStrip from "@/components/TrustStrip";
 import WhatHappensNext from "@/components/WhatHappensNext";
+import MaintenanceHoldingState from "@/components/MaintenanceHoldingState";
+import { LEAD_SUBMISSION_ENABLED } from "@/lib/lead-submission-gate";
 
 interface LeadCaptureFormProps {
     previewUrl: string;
@@ -59,6 +61,22 @@ export default function LeadCaptureForm({ previewUrl, projectType, style, onBack
         }
         if (honeypot) return;
 
+        // ─────────────────────────────────────────────────────────────────
+        // LEAD-GATE-TODO: Liability Containment Sprint — AI Preview lead
+        // capture is temporarily disabled. While LEAD_SUBMISSION_ENABLED is
+        // false we do NOT insert into Supabase or invoke notify-lead. The
+        // upstream AI Preview UX is preserved (the preview was already
+        // generated before this form rendered) — we just render the
+        // maintenance state in place of the post-submit success screen.
+        // See src/lib/lead-submission-gate.ts.
+        // ─────────────────────────────────────────────────────────────────
+        if (!LEAD_SUBMISSION_ENABLED) {
+                setSubmitting(true);
+                setDone(true);
+                setSubmitting(false);
+                return;
+        }
+
         setSubmitting(true);
 
         try {
@@ -67,6 +85,8 @@ export default function LeadCaptureForm({ previewUrl, projectType, style, onBack
                 const isZip = /^\d{5}$/.test(zipOrArea);
                 const newLeadId = crypto.randomUUID();
 
+          // LEAD-GATE-TODO: replace this insert + notify-lead trio with the
+          // server-side submit edge function.
           const { error } = await supabase.from("leads").insert({
                     id: newLeadId,
                     name: form.name.trim(),
@@ -104,7 +124,14 @@ export default function LeadCaptureForm({ previewUrl, projectType, style, onBack
 
   if (done) return (
         <div className="max-w-md mx-auto animate-fade-in">
-              <WhatHappensNext name={form.name} service={safeReplace(projectType, / /g, "") || "Renovation"} />
+              {/* LEAD-GATE-TODO: while LEAD_SUBMISSION_ENABLED is false we
+                  render the maintenance state instead of the WhatHappensNext
+                  success screen — the lead was never actually transmitted. */}
+              {LEAD_SUBMISSION_ENABLED ? (
+                <WhatHappensNext name={form.name} service={safeReplace(projectType, / /g, "") || "Renovation"} />
+              ) : (
+                <MaintenanceHoldingState />
+              )}
         </div>
       );
   

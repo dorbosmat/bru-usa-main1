@@ -7,6 +7,7 @@ import {
   Phone, Hammer, ChevronDown,
 } from "lucide-react";
 import { COMPANY_PHONE } from "@/lib/constants";
+import { LEAD_SUBMISSION_ENABLED } from "@/lib/lead-submission-gate";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 // ─── Config ──────────────────────────────────────────────────────────────────
@@ -397,12 +398,32 @@ export default function ChatWidget() {
 
   // ── lead submission ───────────────────────────────────────────────────────────
   const submitLead = async (data: LeadData) => {
+    // ─────────────────────────────────────────────────────────────────────
+    // LEAD-GATE-TODO: Liability Containment Sprint — chatbot lead capture is
+    // temporarily disabled. While LEAD_SUBMISSION_ENABLED is false we do not
+    // write to Supabase, invoke notify-lead, or invoke distribute-lead — we
+    // just acknowledge in chat and stop collecting. Re-enable by replacing
+    // the disabled writes below with a single call to the new server-side
+    // submit edge function. See src/lib/lead-submission-gate.ts.
+    // ─────────────────────────────────────────────────────────────────────
+    if (!LEAD_SUBMISSION_ENABLED) {
+      showBotWithDelay(
+        `Thanks, **${data.name}** — but we're temporarily not accepting new requests while we upgrade our contractor network. Please check back soon.`
+      );
+      setLeadSubmitted(true);
+      setCollectingLead(false);
+      setLeadFieldIdx(0);
+      return;
+    }
+
     const leadId  = crypto.randomUUID();
     const phone   = data.phone.replace(/\D/g, "").slice(-10);
     const email   = data.email.toLowerCase() === "skip" || !data.email ? null : data.email;
     const zipVal  = data.zip.replace(/\D/g, "").slice(0, 5);
     const locFb   = data.location_text || data.service_area || null;
 
+    // LEAD-GATE-TODO: replace this insert + notify-lead + distribute-lead
+    // trio with a single server-side submit call.
     const { error } = await supabase.from("leads").insert({
       id:           leadId,
       name:         data.name,
