@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { trackCtaClick } from "@/lib/analytics";
 
-import beforeBathroom from "@/assets/ai-preview/before-bathroom.png";
-import afterBathroom from "@/assets/ai-preview/after-bathroom.png";
+import beforeBathroom from "@/assets/ai-preview/before-bathroom.jpg";
+import afterBathroom from "@/assets/ai-preview/after-bathroom.jpg";
 
 // TODO(i18n): move section copy below into LanguageContext when localizing.
 // AI-DISCLOSURE-TODO: this section markets an AI tool. The eyebrow,

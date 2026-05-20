@@ -40,7 +40,19 @@ const VideoHero = ({ title, subtitle, videoSrc = "/videos/hero-bg.mp4", posterSr
           <source src={videoSrc} type="video/mp4" />
         </video>
       ) : posterSrc ? (
-        <img src={posterSrc} alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover" />
+        // CWV-TODO: hero poster — eager-loaded as the LCP candidate. Width
+        // and height are nominal aspect-ratio hints; the section sets the
+        // actual rendered box size via tailwind h-[340px] md:h-[400px].
+        <img
+          src={posterSrc}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover"
+          width={1920}
+          height={1080}
+          decoding="async"
+          fetchPriority="high"
+        />
       ) : null}
       {(showVideo || posterSrc) && <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />}
       <div className="relative z-10 container mx-auto px-4 text-center">

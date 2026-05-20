@@ -35,7 +35,7 @@ const AboutHero = () => {
     <section className="relative h-[75vh] min-h-[520px] flex items-center overflow-hidden bg-primary">
       {/* Background — static team image */}
       <img
-        src="/videos/work-team-pic.png"
+        src="/videos/work-team-pic.jpg"
         alt="Construction team working together"
         className="absolute inset-0 w-full h-full object-cover object-top rounded-2xl shadow-lg"
       />
