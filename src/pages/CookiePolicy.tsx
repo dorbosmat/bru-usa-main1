@@ -15,7 +15,7 @@ const CookiePolicy = () => (
           Cookie Policy
         </h1>
         <p className="text-muted-foreground text-sm mb-10">
-          Last Updated: April 10, 2026
+          Last Updated: May 20, 2026
         </p>
 
         <div className="prose prose-sm md:prose-base max-w-none text-foreground/90 space-y-8">

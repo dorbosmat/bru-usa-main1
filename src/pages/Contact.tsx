@@ -87,7 +87,7 @@ const Contact = () => {
             <span className="text-accent">your project.</span>
           </Premium3DHeading>
           <p className="mt-5 text-base md:text-lg text-primary-foreground/80 max-w-xl mx-auto leading-relaxed">
-            Takes 60 seconds · No obligation · Licensed professionals
+            Short form · No obligation · Licensed professionals
           </p>
         </div>
       </section>

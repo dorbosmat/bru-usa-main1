@@ -15,12 +15,17 @@ const SmsConsent = () => (
           SMS & Communication Consent
         </h1>
         <p className="text-muted-foreground text-sm mb-10">
-          Last Updated: April 10, 2026
+          Last Updated: May 20, 2026 · Consent text version: v1-2026-05-20
         </p>
 
         <div className="prose prose-sm md:prose-base max-w-none text-foreground/90 space-y-8">
+          {/* TCPA-TODO: this page is the canonical "what you agreed to" doc
+              referenced from CURRENT_CONSENT.text in src/lib/consent-text.ts.
+              When the consent wording is bumped to v2 (e.g. once contractor
+              buyers are real and per-seller naming is required), update both
+              files together and keep this Last-Updated date in sync. */}
           <p>
-            By submitting your contact information through a form on the Build Right USA website at buildright-usa.com (the "Platform"), you provide your express written consent to the following communication practices.
+            By ticking the consent box on a form on the Build Right USA website at buildright-usa.com (the "Platform"), you provide your express written consent to the following communication practices. The exact wording you agreed to is recorded server-side along with the consent text version (currently <strong>v1-2026-05-20</strong>) so we can show you later what you saw at the time of submission.
           </p>
 
           <div>

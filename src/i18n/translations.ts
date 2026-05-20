@@ -295,7 +295,7 @@ export const translations: Record<Language, TranslationKeys> = {
 
     galleryTitle: "Real",
     galleryHighlight: "Projects",
-    galleryCta: "free estimate in 60 seconds",
+    galleryCta: "request a free estimate",
     galleryLoading: "Loading gallery...",
     galleryImageFailed: "Image failed to load",
 
@@ -458,7 +458,7 @@ export const translations: Record<Language, TranslationKeys> = {
 
     galleryTitle: "Proyectos",
     galleryHighlight: "Reales",
-    galleryCta: "cotización gratis en 60 segundos",
+    galleryCta: "solicita una cotización gratuita",
     galleryLoading: "Cargando galería...",
     galleryImageFailed: "No se pudo cargar la imagen",
 
@@ -621,7 +621,7 @@ export const translations: Record<Language, TranslationKeys> = {
 
     galleryTitle: "مشاريع",
     galleryHighlight: "حقيقية",
-    galleryCta: "تقدير مجاني في 60 ثانية",
+    galleryCta: "اطلب تقديرًا مجانيًا",
     galleryLoading: "جاري تحميل المعرض...",
     galleryImageFailed: "فشل تحميل الصورة",
 
@@ -784,7 +784,7 @@ export const translations: Record<Language, TranslationKeys> = {
 
     galleryTitle: "Реальные",
     galleryHighlight: "проекты",
-    galleryCta: "бесплатная оценка за 60 секунд",
+    galleryCta: "запросить бесплатную оценку",
     galleryLoading: "Загрузка галереи...",
     galleryImageFailed: "Не удалось загрузить изображение",
 
@@ -947,7 +947,7 @@ export const translations: Record<Language, TranslationKeys> = {
 
     galleryTitle: "Projetos",
     galleryHighlight: "Reais",
-    galleryCta: "orçamento grátis em 60 segundos",
+    galleryCta: "solicite um orçamento gratuito",
     galleryLoading: "Carregando galeria...",
     galleryImageFailed: "Falha ao carregar imagem",
 
@@ -1110,7 +1110,7 @@ export const translations: Record<Language, TranslationKeys> = {
 
     galleryTitle: "פרויקטים",
     galleryHighlight: "אמיתיים",
-    galleryCta: "הצעת מחיר חינם ב-60 שניות",
+    galleryCta: "בקש הצעת מחיר חינם",
     galleryLoading: "טוען גלריה...",
     galleryImageFailed: "הטעינה נכשלה",
 
@@ -1273,7 +1273,7 @@ export const translations: Record<Language, TranslationKeys> = {
 
     galleryTitle: "वास्तविक",
     galleryHighlight: "प्रोजेक्ट",
-    galleryCta: "60 सेकंड में मुफ्त अनुमान",
+    galleryCta: "मुफ्त अनुमान का अनुरोध करें",
     galleryLoading: "गैलरी लोड हो रही है...",
     galleryImageFailed: "छवि लोड करने में विफल",
 
@@ -1436,7 +1436,7 @@ export const translations: Record<Language, TranslationKeys> = {
 
     galleryTitle: "真实",
     galleryHighlight: "项目",
-    galleryCta: "60秒内获取免费估价",
+    galleryCta: "申请免费估价",
     galleryLoading: "加载画廊...",
     galleryImageFailed: "图片加载失败",
 

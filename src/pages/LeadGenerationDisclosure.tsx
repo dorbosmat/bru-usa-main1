@@ -15,13 +15,20 @@ const LeadGenerationDisclosure = () => (
           Lead Generation Disclosure
         </h1>
         <p className="text-muted-foreground text-sm mb-10">
-          Last Updated: April 10, 2026
+          Last Updated: May 20, 2026 · Consent text version: v1-2026-05-20
         </p>
 
         <div className="prose prose-sm md:prose-base max-w-none text-foreground/90 space-y-8">
+          {/* LEGAL-TODO: this disclosure is currently aligned with the
+              conservative pre-counsel-review framing where Build Right USA
+              contacts the visitor itself rather than naming specific
+              contractor buyers. When the contractor monetization model is
+              finalized AND counsel has reviewed against the FCC one-to-one
+              consent rule, bump CURRENT_CONSENT to v2 and add the
+              per-seller language here. */}
           <div className="bg-accent/10 border border-accent/20 rounded-lg p-4">
             <p className="font-medium text-foreground">
-              <strong>Important:</strong> Build Right USA is a lead generation platform. By submitting your information through our website, you acknowledge and agree to the terms described in this disclosure.
+              <strong>Important:</strong> Build Right USA is a contractor referral platform that connects homeowners in selected U.S. metro areas with independent licensed contractors. We are not a contractor and do not perform construction work. By submitting your information, you acknowledge and agree to the terms described in this disclosure.
             </p>
           </div>
 

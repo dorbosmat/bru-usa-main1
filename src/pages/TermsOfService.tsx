@@ -6,7 +6,7 @@ const TermsOfService = () => (
   <Layout>
     <Helmet>
       <title>Terms of Service | Build Right USA</title>
-      <meta name="description" content="Terms of Service for Build Right USA, a lead generation platform connecting homeowners with licensed contractors across the United States." />
+      <meta name="description" content="Terms of Service for Build Right USA, a contractor referral service for homeowners in selected U.S. metro areas." />
     </Helmet>
 
     <section className="bg-background py-16 md:py-24">
@@ -15,7 +15,7 @@ const TermsOfService = () => (
           Terms of Service
         </h1>
         <p className="text-muted-foreground text-sm mb-10">
-          Last Updated: April 10, 2026
+          Last Updated: May 20, 2026 · Consent text version: v1-2026-05-20
         </p>
 
         <div className="prose prose-sm md:prose-base max-w-none text-foreground/90 space-y-8">

@@ -15,12 +15,12 @@ const PrivacyPolicy = () => (
           Privacy Policy
         </h1>
         <p className="text-muted-foreground text-sm mb-10">
-          Last Updated: April 10, 2026
+          Last Updated: May 20, 2026 · Consent text version: v1-2026-05-20
         </p>
 
         <div className="prose prose-sm md:prose-base max-w-none text-foreground/90 space-y-8">
           <p>
-            Build Right USA ("Company," "we," "us," or "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your personal information when you visit our website at buildright-usa.com (the "Platform") or use our lead generation and contractor matching services.
+            Build Right USA ("Company," "we," "us," or "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your personal information when you visit our website at buildright-usa.com (the "Platform") or use our contractor referral and AI Renovation Preview services.
           </p>
           <p>
             By using the Platform, you consent to the data practices described in this policy. If you do not agree with this policy, please do not use our Platform.
@@ -135,14 +135,24 @@ const PrivacyPolicy = () => (
           </div>
 
           <div>
-            <h2 className="font-display text-xl font-bold text-foreground mb-3">10. Changes to This Privacy Policy</h2>
+            <h2 className="font-display text-xl font-bold text-foreground mb-3">10. AI Features &amp; Automated Processing</h2>
+            <p>
+              The Platform includes AI-powered features: an <strong>AI Renovation Preview</strong> tool that processes photos you upload to generate illustrative before/after images, and an <strong>AI Assistant</strong> chat that answers general home-improvement questions. These features are operated through third-party AI providers (currently Google Gemini, accessed via the Lovable AI gateway). Inputs you submit to these tools (uploaded photos, chat messages, project details) are transmitted to the provider for processing.
+            </p>
+            <p className="mt-2">
+              The AI Assistant is automated software, not a human contractor or employee, and is labeled as such in the chat interface. AI-generated previews and responses are for illustrative purposes only — they are not a guarantee of price, materials, scope, timing, or final build. See our <Link to="/disclaimer" className="text-accent hover:underline">Disclaimer</Link> for the full AI content disclosure.
+            </p>
+          </div>
+
+          <div>
+            <h2 className="font-display text-xl font-bold text-foreground mb-3">11. Changes to This Privacy Policy</h2>
             <p>
               We may update this Privacy Policy from time to time. Changes will be posted on this page with an updated "Last Updated" date. Your continued use of the Platform constitutes acceptance of the revised policy.
             </p>
           </div>
 
           <div>
-            <h2 className="font-display text-xl font-bold text-foreground mb-3">11. Contact Us</h2>
+            <h2 className="font-display text-xl font-bold text-foreground mb-3">12. Contact Us</h2>
             <p>
               If you have questions or concerns about this Privacy Policy, please contact us at:
             </p>

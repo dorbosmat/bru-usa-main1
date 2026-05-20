@@ -18,7 +18,7 @@ const CcpaNotice = () => (
           California Consumer Privacy Act Disclosure
         </p>
         <p className="text-muted-foreground text-sm mb-10">
-          Last Updated: April 10, 2026
+          Last Updated: May 20, 2026 · Consent text version: v1-2026-05-20
         </p>
 
         <div className="prose prose-sm md:prose-base max-w-none text-foreground/90 space-y-8">

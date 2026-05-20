@@ -93,7 +93,7 @@ const AboutHero = () => {
             className="mt-5 text-base md:text-lg text-white/85 max-w-xl leading-relaxed"
             style={{ textShadow: "0 1px 8px rgba(0,0,0,0.45)" }}
           >
-            We connect homeowners with licensed local pros — fast, transparent, and built around real projects.
+            We connect homeowners in select U.S. metro areas with independent licensed contractors — transparently and around real projects.
           </p>
 
           {/* CTA — premium, tactile press feedback */}
@@ -124,7 +124,7 @@ const AboutHero = () => {
             </span>
             <span className="inline-flex items-center gap-1.5">
               <CheckCircle size={11} className="text-accent" aria-hidden="true" />
-              60 seconds
+              Short form
             </span>
           </p>
         </div>
@@ -141,8 +141,8 @@ const STEPS = [
   },
   {
     icon: Users,
-    title: "We Match You",
-    desc: "We connect you with vetted, licensed pros in your area.",
+    title: "We Review Your Request",
+    desc: "We look for an independent licensed contractor in your area whose service mix fits your project.",
   },
   {
     icon: Rocket,
@@ -151,26 +151,33 @@ const STEPS = [
   },
 ];
 
+// TRUST-TODO: every pillar below makes a claim about the contractor
+// network. As Build Right USA onboards real contractors with signed
+// agreements, replace each pillar's `desc` with a measured statement
+// backed by data (license verification rate, average response time,
+// metro coverage). Never reintroduce unverifiable numbers like
+// "25+ years combined experience" — that one referred to the founders'
+// own background and was easy to misread as an active-network claim.
 const TRUST_PILLARS = [
   {
     Icon: Shield,
-    title: "Licensed & Insured",
-    desc: "Every contractor we work with is fully licensed, bonded, and insured.",
+    title: "Licensed & Insured Only",
+    desc: "We require every contractor in our referral network to hold a current state license and active insurance for the work they perform.",
   },
   {
     Icon: Award,
-    title: "25+ Years Combined Experience",
-    desc: "Decades of hands-on craftsmanship across roofing, remodeling, and exterior work.",
+    title: "Independent Operators",
+    desc: "Each contractor is an independent local business — never a Build Right USA employee. You contract with them directly.",
   },
   {
     Icon: MapPin,
-    title: "Local Florida Pros",
-    desc: "Vetted teams that know your climate, codes, and neighborhoods.",
+    title: "Florida-First Coverage",
+    desc: "Build Right USA is currently active in Florida and selected California metros, and is expanding from there.",
   },
   {
     Icon: Clock,
-    title: "Fast 24-Hour Response",
-    desc: "Get matched with the right pro within a day — no waiting weeks.",
+    title: "We Aim to Respond Quickly",
+    desc: "We try to review every request the same business day. Contractor outreach timing varies and is not guaranteed.",
   },
 ];
 
@@ -209,7 +216,7 @@ const VALUES = [
   {
     Icon: Shield,
     title: "Real Professionals",
-    desc: "Licensed, insured, and reviewed before they reach you.",
+    desc: "We require contractors to be licensed and insured. You confirm credentials directly with the contractor before signing.",
   },
   {
     Icon: MessageCircle,
@@ -316,7 +323,7 @@ const About = () => {
                   Finding the right pro shouldn't mean six unanswered calls, three no-shows, and a quote on the back of a napkin.
                 </p>
                 <p>
-                  BuildRight USA connects you directly with vetted, licensed local professionals — quickly, transparently, and without the usual friction.
+                  BuildRight USA connects you with independent licensed local professionals — transparently, and without the usual friction. You contract with the contractor directly.
                 </p>
               </div>
               {/* Humanization quote callout */}
@@ -348,7 +355,7 @@ const About = () => {
               Three steps. Zero friction.
             </h2>
             <p className="mt-3 text-muted-foreground">
-              From request to matched pro — in under 60 seconds.
+              Submit your request, we review it, then we reach out about a free estimate.
             </p>
           </div>
 
@@ -536,8 +543,14 @@ const About = () => {
           <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-primary-foreground leading-[1.1]">
             Ready to see what your project could cost?
           </h2>
+          {/* TRUST-TODO: removed "Get matched with vetted local pros in 60
+              seconds. Real estimates" — that was an availability + SLA
+              promise the platform can't currently substantiate (lead form
+              is gated off and contractor network is still expanding).
+              Replace with a measured "X minutes" promise only once we
+              have data to back it. */}
           <p className="mt-4 text-base md:text-lg text-primary-foreground/80 max-w-xl mx-auto leading-relaxed">
-            Get matched with vetted local pros in 60 seconds. Real estimates. Zero obligation.
+            Tell us about your project. We'll review your request and reach out about a free, no-obligation estimate.
           </p>
 
           <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">

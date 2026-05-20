@@ -25,26 +25,34 @@ const Services = () => {
     { Icon: CheckCircle, label: t.trustNoObligation },
   ];
 
+  // TRUST-TODO: mirrors the WHY pillars in src/pages/About.tsx. Both must
+  // make claims that are factually defensible. As Build Right USA onboards
+  // real contractors, replace each `desc` with a measured statement
+  // backed by data. Never reintroduce unverifiable numbers ("25+ years
+  // combined experience" referred to the founders' background and was
+  // easy to misread as an active-network claim) or unverifiable SLAs
+  // ("Fast 24-Hour Response" promised a contractor turnaround the
+  // platform can't currently substantiate).
   const WHY_PILLARS = [
     {
       Icon: Shield,
-      title: "Licensed & Insured",
-      desc: "Every contractor we work with is fully licensed, bonded, and insured — so you're protected from start to finish.",
+      title: "Licensed & Insured Only",
+      desc: "We require every contractor in our referral network to hold a current state license and active insurance for the work they perform.",
     },
     {
       Icon: Award,
-      title: "25+ Years Combined Experience",
-      desc: "Decades of hands-on craftsmanship across roofing, remodeling, and exterior work.",
+      title: "Independent Operators",
+      desc: "Each contractor is an independent local business — never a Build Right USA employee. You contract with them directly.",
     },
     {
       Icon: MapPin,
-      title: "Local Florida Pros",
-      desc: "We work with vetted teams that know your climate, codes, and neighborhoods.",
+      title: "Florida-First Coverage",
+      desc: "Build Right USA is currently active in Florida and selected California metros, and is expanding from there.",
     },
     {
       Icon: Clock,
-      title: "Fast 24-Hour Response",
-      desc: "Get matched with the right pro within a day — no waiting weeks for a callback.",
+      title: "We Aim to Respond Quickly",
+      desc: "We try to review every request the same business day. Contractor outreach timing varies and is not guaranteed.",
     },
   ];
 

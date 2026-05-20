@@ -117,11 +117,23 @@ const Footer = () => {
         <div className="mt-4 pt-4 border-t border-primary-foreground/10 text-center text-xs text-primary-foreground/50 space-y-2">
           <p>© {new Date().getFullYear()} Build Right USA – Lead Generation Platform</p>
           <p className="text-[11px] text-primary-foreground/40">{t.footerReferral}</p>
+          {/* LEGAL-TODO: footer legal-link strip. Order = read-order, ending
+              with the most niche disclosures. Every entry MUST correspond
+              to a real route in src/App.tsx (verified Task 8). */}
           <div className="flex flex-wrap justify-center gap-x-1 gap-y-1">
-            {[["Terms","/terms-of-service"],["Privacy","/privacy-policy"],["Cookies","/cookie-policy"],["Disclaimer","/disclaimer"],["Lead Disclosure","/lead-generation-disclosure"],["CCPA","/ccpa-notice"]].map(([label,path]) => (
+            {[
+              ["Terms","/terms-of-service"],
+              ["Privacy","/privacy-policy"],
+              ["Cookies","/cookie-policy"],
+              ["Disclaimer","/disclaimer"],
+              ["Lead Disclosure","/lead-generation-disclosure"],
+              ["SMS Consent","/sms-consent"],
+              ["CCPA","/ccpa-notice"],
+              ["Data Rights","/data-rights"],
+            ].map(([label,path], i, arr) => (
               <span key={path} className="flex items-center gap-1">
                 <Link to={path} className="hover:text-accent transition-colors">{label}</Link>
-                {path !== "/ccpa-notice" && <span>|</span>}
+                {i < arr.length - 1 && <span>|</span>}
               </span>
             ))}
           </div>
