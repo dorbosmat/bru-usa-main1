@@ -30,6 +30,7 @@ const ServiceDetail = () => {
       <Helmet>
         <title>{content?.heroTitle || service.title} | Build Right USA</title>
         <meta name="description" content={content?.heroSubtitle || service.description} />
+        <link rel="canonical" href={`https://www.buildright-usa.com/services/${service.slug}`} />
       </Helmet>
 
       {/* Hero with image */}

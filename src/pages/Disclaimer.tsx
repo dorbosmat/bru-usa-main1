@@ -6,7 +6,8 @@ const Disclaimer = () => (
   <Layout>
     <Helmet>
       <title>Disclaimer | Build Right USA</title>
-      <meta name="description" content="Important disclaimers regarding Build Right USA's lead generation services and contractor referral platform." />
+      <meta name="description" content="Important disclaimers regarding Build Right USA's contractor referral service. Includes the AI-generated content disclaimer and emergency redirect to 911." />
+      <link rel="canonical" href="https://www.buildright-usa.com/disclaimer" />
     </Helmet>
 
     <section className="bg-background py-16 md:py-24">

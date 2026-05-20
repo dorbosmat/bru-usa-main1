@@ -4,9 +4,15 @@ import { Link } from "react-router-dom";
 
 const CookiePolicy = () => (
   <Layout>
+    {/* SEO-TODO: regulatory page — Disallowed in robots.txt AND noindex
+        here. Mirrors the strategy for /sms-consent, /ccpa-notice, and
+        /data-rights. Reachable via direct link from the footer + from
+        within the Privacy Policy. */}
     <Helmet>
       <title>Cookie Policy | Build Right USA</title>
       <meta name="description" content="Cookie Policy for Build Right USA. Learn about the cookies and tracking technologies we use." />
+      <meta name="robots" content="noindex, nofollow" />
+      <link rel="canonical" href="https://www.buildright-usa.com/cookie-policy" />
     </Helmet>
 
     <section className="bg-background py-16 md:py-24">

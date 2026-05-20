@@ -1,16 +1,21 @@
 import { useParams, Link } from "react-router-dom";
 import Layout from "@/components/Layout";
+import SeoHead from "@/components/SeoHead";
 import LeadForm from "@/components/LeadForm";
 import { SERVICES, SERVICE_AREAS } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
-import { Shield, Clock, ThumbsUp, Star, ArrowRight } from "lucide-react";
+import { Shield, Clock, ThumbsUp, ArrowRight } from "lucide-react";
 import NotFound from "./NotFound";
 
+// TRUST-TODO: previous chips claimed "On-Time Guarantee" / "Satisfaction
+// Promise" / "5-Star Reviews" — three unverifiable promises Build Right
+// USA cannot substantiate (we don't perform the work and we don't yet
+// have a public review surface). Replaced with mechanism-level statements
+// consistent with Task 8/9 messaging across About + Services.
 const TRUST_ITEMS = [
-  { icon: Shield, label: "Licensed & Insured" },
-  { icon: Clock, label: "On-Time Guarantee" },
-  { icon: ThumbsUp, label: "Satisfaction Promise" },
-  { icon: Star, label: "5-Star Reviews" },
+  { icon: Shield,   label: "Licensed & insured contractors only" },
+  { icon: Clock,    label: "Same-business-day request review" },
+  { icon: ThumbsUp, label: "No obligation, ever" },
 ];
 
 export default function LocationDetail() {
@@ -23,6 +28,11 @@ export default function LocationDetail() {
 
   return (
     <Layout>
+      <SeoHead
+        title={`${area.name} | Build Right USA Contractor Referrals`}
+        description={`${area.heroSub} Build Right USA refers ${area.city} homeowners to independent licensed contractors. Free, no-obligation requests.`}
+        path={`/locations/${area.slug}`}
+      />
       {/* Hero */}
       <section className="relative bg-primary py-16 md:py-24">
         <div className="container mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -100,8 +110,11 @@ export default function LocationDetail() {
           <h2 className="font-display text-3xl md:text-4xl font-bold text-primary-foreground">
             Ready to Start Your {area.city} Project?
           </h2>
+          {/* TRUST-TODO: removed "most quotes delivered within 24 hours"
+              — unverifiable contractor-side SLA. Replaced with the same
+              honest framing used on About + Services. */}
           <p className="mt-3 text-primary-foreground/80 max-w-lg mx-auto">
-            Get a free, no-obligation estimate — most quotes delivered within 24 hours.
+            Tell us about your project — there's no obligation, and there's no charge to you.
           </p>
           <Link to="/contact">
             <Button variant="hero" size="lg" className="mt-6">

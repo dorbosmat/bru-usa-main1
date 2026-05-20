@@ -4,9 +4,14 @@ import { Link } from "react-router-dom";
 
 const SmsConsent = () => (
   <Layout>
+    {/* SEO-TODO: regulatory page — Disallowed in robots.txt AND noindex
+        here. Reachable via direct link from the footer + from
+        CURRENT_CONSENT in src/lib/consent-text.ts. */}
     <Helmet>
       <title>SMS & Communication Consent | Build Right USA</title>
       <meta name="description" content="SMS and communication consent policy for Build Right USA. Learn about how we and our contractor partners may contact you." />
+      <meta name="robots" content="noindex, nofollow" />
+      <link rel="canonical" href="https://www.buildright-usa.com/sms-consent" />
     </Helmet>
 
     <section className="bg-background py-16 md:py-24">

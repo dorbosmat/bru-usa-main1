@@ -1,4 +1,5 @@
 import Layout from "@/components/Layout";
+import SeoHead from "@/components/SeoHead";
 import ImageHero from "@/components/ImageHero";
 import ServiceCard from "@/components/ServiceCard";
 import BruMark from "@/components/BruMark";
@@ -64,6 +65,11 @@ const Services = () => {
 
   return (
     <Layout>
+      <SeoHead
+        title="Services | Build Right USA"
+        description="Roofing, kitchen and bath remodels, flooring, windows, doors, concrete, painting, and general remodeling — referred through Build Right USA's Florida-first network of independent licensed contractors."
+        path="/services"
+      />
       <ImageHero
         title={
           <>

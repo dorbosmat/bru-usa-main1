@@ -4,9 +4,13 @@ import { Link } from "react-router-dom";
 
 const DataRights = () => (
   <Layout>
+    {/* SEO-TODO: regulatory page — Disallowed in robots.txt AND noindex
+        here. Reachable via direct link from the footer. */}
     <Helmet>
       <title>Data Rights | Build Right USA</title>
       <meta name="description" content="Your data rights with Build Right USA. Learn about your right to access, delete, and control your personal data." />
+      <meta name="robots" content="noindex, nofollow" />
+      <link rel="canonical" href="https://www.buildright-usa.com/data-rights" />
     </Helmet>
 
     <section className="bg-background py-16 md:py-24">

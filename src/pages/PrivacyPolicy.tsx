@@ -7,6 +7,7 @@ const PrivacyPolicy = () => (
     <Helmet>
       <title>Privacy Policy | Build Right USA</title>
       <meta name="description" content="Privacy Policy for Build Right USA. Learn how we collect, use, and protect your personal information." />
+      <link rel="canonical" href="https://www.buildright-usa.com/privacy-policy" />
     </Helmet>
 
     <section className="bg-background py-16 md:py-24">

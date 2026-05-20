@@ -1,24 +1,33 @@
-import { useParams, Navigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import Layout from "@/components/Layout";
 import LeadForm from "@/components/LeadForm";
 import { SERVICES, SERVICE_AREAS } from "@/lib/constants";
-import { Shield, Star, Users, CheckCircle } from "lucide-react";
+import { Shield, Users, CheckCircle } from "lucide-react";
 import heroImage from "@/assets/home/hero-construction.jpg";
+import NotFound from "./NotFound";
 
-function rand(min: number, max: number) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
+// TRUST-TODO: previous TRUST_BADGES included "4.8 ⭐ Average Rating" — a
+// fabricated review-score claim that Tasks 2/8/9 cleaned everywhere else.
+// Removed. When a real verified-review surface (Google Business Profile,
+// Trustpilot) ships, re-add it with the actual measured number.
+//
+// FAKE-ACTIVITY-TODO: previous body rendered "{rand(3,8)} homeowners in
+// {city} requested quotes today" — the same Math.random-driven fake
+// social proof Task 2 removed in ActivityToast + LeadForm. Removed.
 const TRUST_BADGES = [
-  { icon: Star, label: "4.8 ⭐ Average Rating" },
-  { icon: Shield, label: "Licensed & Insured" },
-  { icon: Users, label: "Local Contractors" },
+  { icon: Shield, label: "Licensed & insured contractors only" },
+  { icon: Users,  label: "Independent local pros" },
 ];
 
 export default function LandingPage() {
   const { slug } = useParams<{ slug: string }>();
-  if (!slug) return <Navigate to="/" replace />;
+  // SEO-TODO: previously did <Navigate to="/" replace /> on slug miss,
+  // which made Google see the homepage at unlimited random URLs (a soft-
+  // 404 disaster). Now we render <NotFound /> (which carries a
+  // noindex meta tag) so crawlers get the right signal. Real HTTP 404
+  // status would require a Vercel edge function; that remains a TODO.
+  if (!slug) return <NotFound />;
 
   // Parse slug: "roofing-tampa", "kitchen-bath-remodel-los-angeles"
   let matchedService: typeof SERVICES[0] | null = null;
@@ -38,11 +47,10 @@ export default function LandingPage() {
     }
   }
 
-  if (!matchedService || !matchedArea) return <Navigate to="/" replace />;
+  if (!matchedService || !matchedArea) return <NotFound />;
 
   const { title: serviceName } = matchedService;
   const { city, name: areaName } = matchedArea;
-  const socialProofCount = rand(3, 8);
   const landingPageSlug = `/${slug}`;
 
   // JSON-LD structured data
@@ -67,7 +75,7 @@ export default function LandingPage() {
           name="description"
           content={`Find trusted ${serviceName.toLowerCase()} contractors in ${city}. Compare quotes from licensed professionals.`}
         />
-        <link rel="canonical" href={`https://buildright-usa.com${landingPageSlug}`} />
+        <link rel="canonical" href={`https://www.buildright-usa.com${landingPageSlug}`} />
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
 
@@ -98,10 +106,13 @@ export default function LandingPage() {
               ))}
             </div>
 
-            {/* Social proof */}
+            {/* FAKE-ACTIVITY-TODO: removed the fake "{N} homeowners in
+                {city} requested quotes today" pill — it was driven by
+                Math.random and is exactly the fake social proof Task 2
+                killed elsewhere. Replaced with an honest framing pill. */}
             <div className="mt-6 inline-flex items-center gap-2 bg-accent/20 text-primary-foreground rounded-full px-4 py-2 text-sm font-medium">
               <CheckCircle size={16} className="text-accent" />
-              {socialProofCount} homeowners in {city} requested quotes today.
+              Free, no-obligation request — {city} project review same business day.
             </div>
           </div>
 

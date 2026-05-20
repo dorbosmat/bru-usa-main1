@@ -6,7 +6,8 @@ const LeadGenerationDisclosure = () => (
   <Layout>
     <Helmet>
       <title>Lead Generation Disclosure | Build Right USA</title>
-      <meta name="description" content="Important disclosure about how Build Right USA generates and distributes leads to licensed contractors and service providers." />
+      <meta name="description" content="Important disclosure about how Build Right USA refers homeowner requests to independent licensed contractors. Florida-first, no obligation, no charge." />
+      <link rel="canonical" href="https://www.buildright-usa.com/lead-generation-disclosure" />
     </Helmet>
 
     <section className="bg-background py-16 md:py-24">

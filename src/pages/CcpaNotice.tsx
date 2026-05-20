@@ -4,9 +4,13 @@ import { Link } from "react-router-dom";
 
 const CcpaNotice = () => (
   <Layout>
+    {/* SEO-TODO: regulatory page — Disallowed in robots.txt AND noindex
+        here. Reachable via direct link from the footer. */}
     <Helmet>
       <title>CCPA Privacy Notice | Build Right USA</title>
       <meta name="description" content="California Consumer Privacy Act (CCPA) notice for Build Right USA. Learn about your California privacy rights." />
+      <meta name="robots" content="noindex, nofollow" />
+      <link rel="canonical" href="https://www.buildright-usa.com/ccpa-notice" />
     </Helmet>
 
     <section className="bg-background py-16 md:py-24">

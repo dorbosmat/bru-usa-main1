@@ -7,6 +7,7 @@ const TermsOfService = () => (
     <Helmet>
       <title>Terms of Service | Build Right USA</title>
       <meta name="description" content="Terms of Service for Build Right USA, a contractor referral service for homeowners in selected U.S. metro areas." />
+      <link rel="canonical" href="https://www.buildright-usa.com/terms-of-service" />
     </Helmet>
 
     <section className="bg-background py-16 md:py-24">

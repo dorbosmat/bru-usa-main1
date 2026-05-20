@@ -1,6 +1,7 @@
 import Layout from "@/components/Layout";
 import LeadForm from "@/components/LeadForm";
 import HeroSlider from "@/components/HeroSlider";
+import SeoHead from "@/components/SeoHead";
 import ProjectGallery from "@/components/ProjectGallery";
 import AiPreviewSection from "@/components/AiPreviewSection";
 import Premium3DHeading from "@/components/Premium3DHeading";
@@ -39,6 +40,11 @@ const Index = () => {
 
   return (
     <Layout>
+      <SeoHead
+        title="Build Right USA | Florida-First Contractor Referrals & AI Renovation Previews"
+        description="Florida-first contractor referral service expanding into selected U.S. metro areas. Try the free AI Renovation Preview while you plan, then request a no-obligation estimate from an independent licensed contractor."
+        path="/"
+      />
       {/* Premium Hero Slider — trust chips relocated into the hero above the fold */}
       <HeroSlider />
 

@@ -1,4 +1,5 @@
 import Layout from "@/components/Layout";
+import SeoHead from "@/components/SeoHead";
 import SmartQuoteEngine from "@/components/contact/SmartQuoteEngine";
 import BruMark from "@/components/BruMark";
 import Premium3DHeading from "@/components/Premium3DHeading";
@@ -51,6 +52,11 @@ const Contact = () => {
 
   return (
     <Layout>
+      <SeoHead
+        title="Contact Build Right USA | Request a Free Estimate"
+        description="Get in touch with Build Right USA — Florida-first contractor referral service. Tell us about your project; we'll review the request and reach out about a free, no-obligation estimate."
+        path="/contact"
+      />
       {/* ───────────── 1. CONVERSION HERO (text-only, no video) ───────────── */}
       <section className="relative py-20 md:py-28 bg-primary overflow-hidden">
         {/* Faded BRU watermark */}

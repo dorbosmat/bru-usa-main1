@@ -143,7 +143,8 @@ const RenovationPreview = () => {
     <Layout>
       <Helmet>
         <title>AI Renovation Preview | Build Right USA</title>
-        <meta name="description" content="Upload a photo of your space and see a realistic AI-powered renovation preview. Get instant price estimates and connect with licensed contractors." />
+        <meta name="description" content="Upload a photo of your space and see an AI-generated renovation preview — a free planning tool from Build Right USA. Illustrative only; not a guarantee of final build, materials, cost, or scope." />
+        <link rel="canonical" href="https://www.buildright-usa.com/renovation-preview" />
         <style>{scanBeamCss}</style>
       </Helmet>
 

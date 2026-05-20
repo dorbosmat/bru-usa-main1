@@ -1,3 +1,7 @@
+# Build Right USA — robots.txt
+# Sprint Task 10 — last updated 2026-05-20.
+# Canonical host is https://www.buildright-usa.com (apex 307-redirects).
+
 User-agent: Googlebot
 Allow: /
 
@@ -12,11 +16,18 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+# Admin surfaces — no SEO value, contain PII once leads are re-enabled.
 Disallow: /admin/
 Disallow: /admin
+
+# Regulatory disclosures — useful in-product, no SEO value. The pages
+# also set <meta name="robots" content="noindex"> for crawlers that
+# ignore robots.txt. Linked from the footer and from CURRENT_CONSENT
+# in src/lib/consent-text.ts so users can always reach them.
 Disallow: /cookie-policy
 Disallow: /sms-consent
 Disallow: /ccpa-notice
 Disallow: /data-rights
 
-Sitemap: https://buildright-usa.com/sitemap.xml
+Sitemap: https://www.buildright-usa.com/sitemap.xml

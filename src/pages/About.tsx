@@ -1,4 +1,5 @@
 import Layout from "@/components/Layout";
+import SeoHead from "@/components/SeoHead";
 import BruMark from "@/components/BruMark";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -237,6 +238,11 @@ const About = () => {
 
   return (
     <Layout>
+      <SeoHead
+        title="About Build Right USA | Florida-First Contractor Referrals"
+        description="Build Right USA is a Florida-first contractor referral service. We connect homeowners with independent licensed contractors — transparently, with no obligation. Learn how we vet, refer, and stay out of your way."
+        path="/about"
+      />
       {/* ───────────── HERO (custom cinematic) ───────────── */}
       <AboutHero />
 
@@ -586,7 +592,7 @@ const About = () => {
             </span>
             <span className="inline-flex items-center gap-1.5">
               <CheckCircle size={12} className="text-accent" aria-hidden="true" />
-              Reply within 24 hours
+              Same-business-day review
             </span>
           </p>
         </div>

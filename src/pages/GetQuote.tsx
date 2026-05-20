@@ -129,8 +129,8 @@ export default function GetQuote() {
         <Layout>
               <Helmet>
                       <title>Get a Free Contractor Quote | Build Right USA</title>
-                      <meta name="description" content="Request free quotes from licensed, insured contractors near you. Roofing, remodeling, flooring, and more. No obligation." />
-                      <link rel="canonical" href="https://buildright-usa.com/get-a-quote" />
+                      <meta name="description" content="Request a free, no-obligation quote from an independent licensed contractor through Build Right USA. Florida-first; expanding into selected U.S. metro areas." />
+                      <link rel="canonical" href="https://www.buildright-usa.com/get-a-quote" />
               </Helmet>
               <section className="py-16 bg-muted">
                       <div className="container mx-auto px-4 max-w-2xl">
