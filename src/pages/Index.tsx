@@ -155,6 +155,85 @@ const Index = () => {
       {/* Real Projects Gallery */}
       <ProjectGallery />
 
+      {/* ─── How We Review Your Request ─────────────────────────────
+          TRUST-TODO: this section replaces fabricated social proof with
+          an honest, mechanism-level explanation of what actually happens
+          when a homeowner submits a request. No reviews, no contractor
+          counts, no time-window promises. Replace these bullet steps
+          with measured SLA data once contractor distribution is wired
+          and tracked. */}
+      <section id="how-we-review" className="py-20 bg-background">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 mb-3 rounded-full bg-accent/10 ring-1 ring-accent/25 px-3 py-1">
+              <span className="text-[11px] font-bold tracking-[0.18em] uppercase text-accent">Florida-First</span>
+            </div>
+            <Premium3DHeading
+              as="h2"
+              variant="section"
+              theme="dark"
+              className="font-display text-2xl md:text-3xl font-bold text-foreground"
+            >
+              How we review your request — <span className="text-accent">step by step</span>
+            </Premium3DHeading>
+            <p className="mt-3 max-w-2xl mx-auto text-sm md:text-base text-muted-foreground leading-relaxed">
+              Build Right USA is a contractor referral service operating Florida-first, expanding into selected California metros. We do not perform construction work and we do not employ contractors. Here's exactly what happens when you submit a request.
+            </p>
+          </div>
+
+          <ol className="grid grid-cols-1 md:grid-cols-2 gap-5 list-none">
+            {[
+              {
+                num: "01",
+                title: "You submit your project details",
+                body: "Service type, ZIP, scope, and how to reach you. Submission is via a single secure form — no third-party trackers in the submit path.",
+              },
+              {
+                num: "02",
+                title: "We review the request the same business day",
+                body: "Our team checks fit: service mix, coverage area, project size. If we can't help, we tell you — no cost, no follow-up.",
+              },
+              {
+                num: "03",
+                title: "We refer you to an independent licensed contractor",
+                body: "We forward your request to a Florida-licensed contractor whose service mix matches. You verify their license and insurance directly with them.",
+              },
+              {
+                num: "04",
+                title: "You stay in control",
+                body: "The contractor contacts you for an estimate. You choose whether to proceed. No charge, no pressure, no obligation.",
+              },
+            ].map(({ num, title, body }) => (
+              <li key={num} className="bg-card border border-border rounded-xl p-5 md:p-6">
+                <span className="font-mono text-[11px] font-bold tracking-[0.18em] text-accent">{num}</span>
+                <h3 className="mt-2 font-display text-base md:text-lg font-bold text-foreground leading-tight">{title}</h3>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{body}</p>
+              </li>
+            ))}
+          </ol>
+
+          {/* TRUST-TODO: the "what we do not guarantee" block is the trust-
+              building counterweight to the steps above. Direct, calm, and
+              short — not legalistic. Cross-links the Disclaimer for the
+              full version. */}
+          <div className="mt-10 rounded-xl bg-muted/40 ring-1 ring-border p-5 md:p-6">
+            <h4 className="font-display text-sm font-bold text-foreground mb-3">What we don't guarantee</h4>
+            <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1.5 text-sm text-muted-foreground leading-relaxed">
+              <li>· A specific contractor will accept your project</li>
+              <li>· A specific response time or callback window</li>
+              <li>· Final price, scope, materials, or timeline</li>
+              <li>· Outcomes of the work the contractor performs</li>
+            </ul>
+            <p className="mt-3 text-xs text-muted-foreground">
+              For the full version see our{" "}
+              <Link to="/disclaimer" className="text-accent hover:underline">Disclaimer</Link>{" and "}
+              <Link to="/lead-generation-disclosure" className="text-accent hover:underline">Lead Generation Disclosure</Link>.
+              For active emergencies, call 911.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Testimonials */}
       {/* FAKE-ACTIVITY-TODO: section gated by HARDCODED_TESTIMONIALS_ENABLED.
           While the flag is false (and the TESTIMONIALS array is empty), the

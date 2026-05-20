@@ -89,6 +89,14 @@ const Contact = () => {
           <p className="mt-5 text-base md:text-lg text-primary-foreground/80 max-w-xl mx-auto leading-relaxed">
             Short form · No obligation · Licensed professionals
           </p>
+          {/* POSITIONING-TODO: small Florida-first signal in the hero so
+              the framing is clear before the visitor even sees the form. */}
+          <p className="mt-4 text-xs text-primary-foreground/70">
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/8 ring-1 ring-white/15 px-3 py-1">
+              <span className="font-bold tracking-[0.18em] uppercase text-accent">Florida-First</span>
+              <span>— now expanding to select U.S. metro areas</span>
+            </span>
+          </p>
         </div>
       </section>
 

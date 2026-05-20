@@ -93,6 +93,18 @@ export const LEAD_EMAIL_CONFIG = {
     `New Lead – ${service} – ${location}`,
 };
 
+// FLORIDA-FIRST-TODO: this list is the authoritative service-area registry.
+// Build Right USA is currently Florida-first (Tampa + statewide Florida)
+// with selected California metros (LA, San Jose, SF Bay) as the early
+// expansion footprint. When adding a new metro:
+//   1. Make sure at least one independent licensed contractor in that ZIP
+//      cluster is onboarded with a signed referral agreement.
+//   2. Update the Florida-first eyebrow chips (Index.tsx, Services.tsx,
+//      Contact.tsx) and the i18n servingTitle/servingHighlight keys if the
+//      footprint description changes.
+//   3. NEVER use the word "nationwide" / "national" / "all 50 states" in
+//      hero copy until contractor supply actually covers the country —
+//      Task 8 stripped those claims everywhere and they must not return.
 export const SERVICE_AREAS = [
   {
     slug: "tampa",

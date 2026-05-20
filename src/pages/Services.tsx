@@ -73,6 +73,20 @@ const Services = () => {
         subtitle={t.servicesPageSubtitle}
       />
 
+      {/* ───────────── Florida-First Positioning Chip ─────────────
+          POSITIONING-TODO: small honest framing bar right under the
+          hero. Mirrors the eyebrow on Index.tsx's "How we review"
+          section so visitors land in the same mental model from any
+          entry page. */}
+      <div className="bg-background border-b border-border">
+        <div className="container mx-auto px-4 md:px-6 lg:px-8 py-3 text-center">
+          <span className="inline-flex items-center gap-2 rounded-full bg-accent/10 ring-1 ring-accent/25 px-3 py-1">
+            <span className="text-[11px] font-bold tracking-[0.18em] uppercase text-accent">Florida-First</span>
+            <span className="text-[11px] text-muted-foreground">— now expanding to select U.S. metro areas</span>
+          </span>
+        </div>
+      </div>
+
       {/* ───────────── TRUST STRIP ───────────── */}
       <section className="relative py-8 md:py-10 bg-muted/40 border-y border-border">
         <div className="container mx-auto px-4 md:px-6 lg:px-8">

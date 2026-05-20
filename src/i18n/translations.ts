@@ -219,8 +219,8 @@ export const translations: Record<Language, TranslationKeys> = {
     howItWorksHighlight: "Works",
     step1Title: "Tell Us About Your Project",
     step1Desc: "Share a few details about your roofing or home project.",
-    step2Title: "We Match You With Local Pros",
-    step2Desc: "We connect you with qualified contractors in Florida.",
+    step2Title: "We Review Your Request",
+    step2Desc: "We look for an independent licensed contractor in your area whose service mix fits your project.",
     step3Title: "Compare Quotes & Choose",
     step3Desc: "Review your options and choose what works for you.",
 
@@ -256,8 +256,8 @@ export const translations: Record<Language, TranslationKeys> = {
     ctaSubtitle: "Get a free, no-obligation estimate today. Our team is standing by to help.",
     ctaButton: "Get Your Free Quote →",
 
-    servingTitle: "Serving Homeowners Across the",
-    servingHighlight: "USA",
+    servingTitle: "Florida-First — Now Expanding to Select",
+    servingHighlight: "U.S. Metro Areas",
 
     formTitle: "Get Your Free Estimate",
     formFullName: "Full Name",
@@ -353,8 +353,8 @@ export const translations: Record<Language, TranslationKeys> = {
     getQuoteSubmit: "Get Your Free Quote",
     getQuoteNoObligation: "No obligation. 100% free estimates from verified contractors.",
     getQuoteSelectCity: "Select City *",
-    heroSliderHeadline: "Find Trusted Contractors Near You — Fast & Easy",
-    heroSliderSubtext: "Get connected with licensed professionals for roofing, remodeling, solar, and more.",
+    heroSliderHeadline: "Florida-First Contractor Referrals & AI Renovation Previews",
+    heroSliderSubtext: "We connect Florida homeowners — and a growing list of California metros — with independent licensed contractors. Try the AI Renovation Preview while you plan.",
     heroSearchPlaceholder: "What service do you need?",
     heroZipPlaceholder: "ZIP Code",
     heroSearchCta: "Get Free Quote",
@@ -382,8 +382,8 @@ export const translations: Record<Language, TranslationKeys> = {
     howItWorksHighlight: "Funciona",
     step1Title: "Cuéntanos sobre tu proyecto",
     step1Desc: "Comparte algunos detalles sobre tu proyecto de techo o hogar.",
-    step2Title: "Te conectamos con profesionales",
-    step2Desc: "Te conectamos con contratistas calificados en Florida.",
+    step2Title: "Revisamos tu solicitud",
+    step2Desc: "Buscamos un contratista independiente con licencia en tu área cuya combinación de servicios se ajuste a tu proyecto.",
     step3Title: "Compara cotizaciones y elige",
     step3Desc: "Revisa tus opciones y elige lo que mejor te convenga.",
 
@@ -419,8 +419,8 @@ export const translations: Record<Language, TranslationKeys> = {
     ctaSubtitle: "Obtén una cotización gratuita hoy. Nuestro equipo está listo para ayudarte.",
     ctaButton: "Obtén tu cotización gratis →",
 
-    servingTitle: "Sirviendo propietarios en",
-    servingHighlight: "EE.UU.",
+    servingTitle: "Florida primero — Expandiéndose a áreas metropolitanas de",
+    servingHighlight: "EE.UU. seleccionadas",
 
     formTitle: "Obtén tu cotización gratis",
     formFullName: "Nombre completo",
@@ -516,8 +516,8 @@ export const translations: Record<Language, TranslationKeys> = {
     getQuoteSubmit: "Obtén tu cotización gratis",
     getQuoteNoObligation: "Sin compromiso. Cotizaciones 100% gratis de contratistas verificados.",
     getQuoteSelectCity: "Selecciona ciudad *",
-    heroSliderHeadline: "Encuentra contratistas confiables cerca de ti — Rápido y fácil",
-    heroSliderSubtext: "Conéctate con profesionales licenciados para techos, remodelaciones, solar y más.",
+    heroSliderHeadline: "Referencias de contratistas en Florida y vista previa de renovación con IA",
+    heroSliderSubtext: "Conectamos a propietarios de Florida — y una lista creciente de áreas metropolitanas de California — con contratistas independientes con licencia. Prueba la vista previa de renovación con IA mientras planificas.",
     heroSearchPlaceholder: "¿Qué servicio necesitas?",
     heroZipPlaceholder: "Código postal",
     heroSearchCta: "Cotización gratis",
@@ -582,8 +582,8 @@ export const translations: Record<Language, TranslationKeys> = {
     ctaSubtitle: "احصل على تقدير مجاني بدون التزام اليوم.",
     ctaButton: "احصل على تقدير مجاني ←",
 
-    servingTitle: "نخدم أصحاب المنازل في",
-    servingHighlight: "أمريكا",
+    servingTitle: "فلوريدا أولاً — نتوسع إلى مناطق مختارة في",
+    servingHighlight: "الولايات المتحدة",
 
     formTitle: "احصل على تقدير مجاني",
     formFullName: "الاسم الكامل",
@@ -745,8 +745,8 @@ export const translations: Record<Language, TranslationKeys> = {
     ctaSubtitle: "Получите бесплатную оценку сегодня. Наша команда готова помочь.",
     ctaButton: "Получить бесплатную оценку →",
 
-    servingTitle: "Обслуживаем домовладельцев по всей",
-    servingHighlight: "Америке",
+    servingTitle: "Сначала Флорида — расширяемся в избранные",
+    servingHighlight: "метро США",
 
     formTitle: "Получите бесплатную оценку",
     formFullName: "Полное имя",
@@ -908,7 +908,7 @@ export const translations: Record<Language, TranslationKeys> = {
     ctaSubtitle: "Obtenha um orçamento gratuito hoje. Nossa equipe está pronta para ajudar.",
     ctaButton: "Obtenha seu orçamento grátis →",
 
-    servingTitle: "Atendendo proprietários em todo",
+    servingTitle: "Florida em primeiro lugar — expandindo para áreas metropolitanas selecionadas dos",
     servingHighlight: "EUA",
 
     formTitle: "Obtenha seu orçamento grátis",
@@ -1071,7 +1071,7 @@ export const translations: Record<Language, TranslationKeys> = {
     ctaSubtitle: "קבל הצעת מחיר חינם היום. הצוות שלנו מוכן לעזור.",
     ctaButton: "← קבל הצעת מחיר חינם",
 
-    servingTitle: "משרתים בעלי בתים ברחבי",
+    servingTitle: "פלורידה תחילה — מתרחבים לאזורי מטרו נבחרים ב",
     servingHighlight: "ארה\"ב",
 
     formTitle: "קבל הצעת מחיר חינם",
@@ -1234,8 +1234,8 @@ export const translations: Record<Language, TranslationKeys> = {
     ctaSubtitle: "आज ही मुफ्त अनुमान प्राप्त करें।",
     ctaButton: "मुफ्त कोटेशन प्राप्त करें →",
 
-    servingTitle: "पूरे अमेरिका में घर मालिकों की सेवा",
-    servingHighlight: "USA",
+    servingTitle: "फ्लोरिडा सबसे पहले — चुनिंदा महानगरीय क्षेत्रों में विस्तार",
+    servingHighlight: "अमेरिका",
 
     formTitle: "मुफ्त अनुमान प्राप्त करें",
     formFullName: "पूरा नाम",
@@ -1397,8 +1397,8 @@ export const translations: Record<Language, TranslationKeys> = {
     ctaSubtitle: "立即获取免费估价。我们的团队随时为您服务。",
     ctaButton: "获取免费报价 →",
 
-    servingTitle: "服务全美各地的",
-    servingHighlight: "业主",
+    servingTitle: "佛罗里达优先 — 正在扩展至选定的",
+    servingHighlight: "美国都市区",
 
     formTitle: "获取免费估价",
     formFullName: "全名",

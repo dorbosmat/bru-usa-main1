@@ -12,16 +12,22 @@ import afterBathroom from "@/assets/ai-preview/after-bathroom.png";
 // subtext, and disclosure footnote together establish "this output is
 // AI-generated" so users do not mistake the preview for a real photograph
 // or a contractor's actual rendering.
+// POSITIONING-TODO: copy now frames the AI Preview as a planning /
+// inspiration tool that homeowners can use independent of any lead
+// submission — useful even for visitors outside Build Right USA's
+// current service areas. The contractor-referral CTA is intentionally
+// secondary here; the contact-form CTA elsewhere on the page handles
+// matching for Florida-first homeowners.
 const COPY = {
   eyebrow: "AI-Powered Renovation Preview",
   headline: "See Your Renovation",
   headlineAccent: "Before You Build",
   subtext:
-    "Upload a photo of your space and our AI generates an illustrative preview in seconds — so you can explore ideas before any work starts.",
+    "Upload a photo of your space and our AI generates an illustrative preview in seconds — so you can explore styles, gather ideas, and plan your project with more confidence. It's a planning tool, not a quote.",
   bullets: [
-    "AI-generated illustration, ready in seconds.",
-    "Try kitchen, bath, or full remodel.",
-    "Free preview — no credit card.",
+    "AI-generated illustration for planning and inspiration.",
+    "Try kitchen, bath, or full remodel — no signup needed.",
+    "Free to use — keep what you like, share it, come back later.",
   ],
   ctaPrimary: "Try AI Preview",
   ctaSecondary: "See how it works",
@@ -34,7 +40,7 @@ const COPY = {
   step3Eyebrow: "Step 3",
   step3Label: "See your result",
   disclosure:
-    "AI-generated illustration for inspiration only — not a guarantee of final build, materials, cost, or scope.",
+    "AI-generated illustration for planning and inspiration only — not a guarantee of final build, materials, cost, scope, or feasibility. Always confirm specifics with a licensed contractor.",
 };
 
 const AiPreviewSection = () => {
