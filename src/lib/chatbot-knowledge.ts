@@ -5,16 +5,19 @@
 
 // ─── Personality & System Prompt ───
 
+// AI-DISCLOSURE-TODO: this personality config seeds the local rule-based
+// fallback (not the edge-function LLM, which has its own SYSTEM_PROMPT).
+// Rules below now require honest AI disclosure and forbid impersonation.
 export const CHATBOT_PERSONALITY = {
-  name: "Build Right USA Assistant",
-  tone: "friendly, confident, helpful — like a knowledgeable neighbor who happens to be a contractor",
+  name: "Build Right USA AI Assistant",
+  tone: "clear, professional, helpful — like a well-informed automated assistant, not a human friend",
   rules: [
     "Keep answers short and clear — 2-3 sentences max unless asked for detail",
-    "Sound like a real person, not a robot",
-    "Be slightly sales-oriented but never pushy",
-    "Always guide toward requesting a free quote",
-    "Use casual language but stay professional",
-    "If unsure, offer to connect them with the team",
+    "You are AI software, not a human and not a contractor. If asked, say so plainly.",
+    "Never claim a personal name, job title, or contractor credentials",
+    "Never imply a real person is reading the conversation in real time",
+    "Use plain, professional language — informative, not chummy",
+    "If unsure, offer the website's contact form rather than guessing",
   ],
 };
 
@@ -167,8 +170,8 @@ export const SERVICE_KNOWLEDGE: Record<string, ServiceKnowledge> = {
       "Insurance claim assistance",
       "Full structural restoration",
     ],
-    timeline: "Emergency response: same day. Full restoration: 1–6 weeks depending on scope.",
-    priceRange: "Varies widely — often covered by insurance. We help with claims.",
+    timeline: "Full restoration typically runs 1–6 weeks depending on scope. For an active emergency, call 911 or a local emergency service — this chat cannot dispatch help.",
+    priceRange: "Varies widely. Many storm projects are partially covered by homeowner's insurance; coverage depends on your policy.",
     whenNeeded: [
       "After a hurricane, tornado, or severe storm",
       "You see visible damage to roof, siding, or windows",
@@ -183,8 +186,13 @@ export const SERVICE_KNOWLEDGE: Record<string, ServiceKnowledge> = {
       "Mold growth after water damage",
       "Structural weakening from wind",
     ],
+    // AI-DISCLOSURE-TODO: previously claimed "We respond fast, handle
+    // emergency repairs, and work directly with your insurance company.
+    // Most homeowners pay little to nothing out of pocket." — those are
+    // contractor-side claims this platform cannot substantiate. Rewritten
+    // to be informational and to redirect real emergencies to 911.
     quickAnswer:
-      "Storm damage is stressful — we make it easier. We respond fast, handle emergency repairs, and work directly with your insurance company. Most homeowners pay little to nothing out of pocket. Let us assess the damage for free! ⛈️",
+      "Storm damage is stressful. If anything is actively dangerous — water flooding, structural collapse, downed power lines — call **911** first; this chat is automated and can't dispatch a crew. For non-urgent storm repairs, a licensed local contractor can assess damage and help you understand whether insurance is likely to cover it.",
   },
 
   windows: {

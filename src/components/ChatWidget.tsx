@@ -255,7 +255,10 @@ async function callAI(messages: AiMsg[]): Promise<string> {
 const INITIAL_MESSAGE: Message = {
   id:           "welcome",
   from:         "bot",
-  text:         "Hey! 👋 I'm Alex, your Build Right USA advisor. Whether it's roofing, remodeling, solar, or storm damage — I can help you figure out your options and connect you with a local pro.\n\nWhat's going on with your home?",
+  // AI-DISCLOSURE-TODO: opening message now identifies as an AI assistant
+  // up-front and avoids implying a human is on the other side or that a
+  // contractor is being "connected" in real time.
+  text:         "👋 Welcome to **Build Right USA**.\n\nI'm the **Build Right USA AI Assistant** — automated software, not a human. I can answer questions about roofing, remodeling, solar, and storm damage, and point you to the right next step if you'd like a free quote.\n\nWhat's going on with your home?",
   quickReplies: QUICK_REPLIES_HOME,
 };
 
@@ -648,8 +651,12 @@ addMsg("bot", cleanReply, qr);
           className="fixed bottom-[76px] md:bottom-6 left-4 z-[60] flex items-center gap-2 rounded-full bg-accent px-4 py-3 text-accent-foreground shadow-lg hover:brightness-110 transition-all"
           aria-label="Open chat"
         >
+          {/* AI-DISCLOSURE-TODO: launcher label now identifies this as an
+              AI assistant rather than a person named "Alex". When real human
+              support is wired, replace the label with a "Talk to a person"
+              variant that routes to a different conversation path. */}
           <Hammer size={18} />
-          <span className="text-sm font-semibold hidden sm:inline">Chat with Alex</span>
+          <span className="text-sm font-semibold hidden sm:inline">Ask the AI assistant</span>
           {unreadCount > 0 && (
             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
               {unreadCount > 9 ? "9+" : unreadCount}
@@ -673,9 +680,13 @@ addMsg("bot", cleanReply, qr);
               <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center shrink-0">
                 <Hammer size={16} className="text-accent-foreground" />
               </div>
+              {/* AI-DISCLOSURE-TODO: header now identifies the surface as an
+                  AI assistant rather than a person named "Alex". When real
+                  human support ships, swap this for the human team-mate's
+                  name + an "AI assistant" tag for clearly-AI conversations. */}
               <div>
-                <p className="font-bold text-primary-foreground text-sm leading-tight">Alex</p>
-                <p className="text-primary-foreground/60 text-[10px] leading-tight">Build Right USA Advisor</p>
+                <p className="font-bold text-primary-foreground text-sm leading-tight">Build Right USA AI Assistant</p>
+                <p className="text-primary-foreground/60 text-[10px] leading-tight">Automated · Responses are AI-generated</p>
               </div>
             </div>
             <div className="flex items-center gap-1.5">
@@ -747,30 +758,38 @@ addMsg("bot", cleanReply, qr);
           )}
 
           {/* Input */}
-          <div className="border-t border-border bg-card p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] flex min-w-0 gap-2 shrink-0">
-            <Input
-              ref={inputRef}
-              id="chat-input"
-              name="chat_message"
-              aria-label="Chat message"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSend()}
-              placeholder={collectingLead ? "Type your answer…" : "Ask about your project…"}
-              className="min-w-0 flex-1 text-base md:text-sm"
-              autoFocus={!isMobile}
-              disabled={isStreaming || showTyping}
-            />
-            <Button
-              size="icon"
-              variant="default"
-              onClick={handleSend}
-              className="shrink-0 bg-accent hover:bg-accent/90 text-accent-foreground"
-              disabled={isStreaming || showTyping || !input.trim()}
-              aria-label="Send"
-            >
-              <Send size={16} />
-            </Button>
+          <div className="border-t border-border bg-card p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shrink-0">
+            <div className="flex min-w-0 gap-2">
+              <Input
+                ref={inputRef}
+                id="chat-input"
+                name="chat_message"
+                aria-label="Chat message"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                placeholder={collectingLead ? "Type your answer…" : "Ask about your project…"}
+                className="min-w-0 flex-1 text-base md:text-sm"
+                autoFocus={!isMobile}
+                disabled={isStreaming || showTyping}
+              />
+              <Button
+                size="icon"
+                variant="default"
+                onClick={handleSend}
+                className="shrink-0 bg-accent hover:bg-accent/90 text-accent-foreground"
+                disabled={isStreaming || showTyping || !input.trim()}
+                aria-label="Send"
+              >
+                <Send size={16} />
+              </Button>
+            </div>
+            {/* AI-DISCLOSURE-TODO: persistent under-input disclosure so the
+                AI label is always visible while the user is typing. When real
+                human chat is introduced, swap copy per conversation mode. */}
+            <p className="mt-1.5 text-[10px] leading-snug text-muted-foreground text-center">
+              Responses are AI-generated and may be inaccurate. For emergencies, call 911.
+            </p>
           </div>
         </div>
       )}

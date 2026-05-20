@@ -1,8 +1,11 @@
 import { ShieldCheck, Clock, BadgeDollarSign, Phone } from "lucide-react";
 
+// AI-DISCLOSURE-TODO: "Respond within 2 hours" was an unverifiable
+// contractor-availability promise — removed. Replace only with a real,
+// measured SLA once contractor distribution is wired and tracked.
 const ITEMS = [
   { icon: ShieldCheck,     text: "Licensed & insured contractors only" },
-  { icon: Clock,           text: "Respond within 2 hours" },
+  { icon: Clock,           text: "Quotes typically delivered the same week" },
   { icon: BadgeDollarSign, text: "100% free to homeowners" },
   { icon: Phone,           text: "No obligation, ever" },
 ];

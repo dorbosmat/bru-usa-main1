@@ -123,8 +123,10 @@ const LeadCaptureModal = ({ projectType, style, onLeadCaptured }: LeadCaptureMod
         <h3 className="font-display text-xl font-bold text-foreground">
           Unlock Your Full Preview
         </h3>
+        {/* AI-DISCLOSURE-TODO: replaced "connect with a specialist" with
+            an honest AI-Preview + future-quote framing. */}
         <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-          Enter your details to see the full before & after result, estimated pricing, and connect with a specialist.
+          Add your details to reveal the full AI-generated before &amp; after, plus ballpark price ranges. You'll be added to the Build Right USA list for a free quote once requests reopen.
         </p>
       </div>
 

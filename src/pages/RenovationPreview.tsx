@@ -178,6 +178,18 @@ const RenovationPreview = () => {
         </div>
 
         <div className="container mx-auto px-4 max-w-3xl relative z-10">
+          {/* AI-DISCLOSURE-TODO: page-level banner so the AI nature of every
+              generated image is visible above the flow itself. */}
+          <div
+            className="mx-auto mb-5 max-w-xl rounded-full bg-accent/10 ring-1 ring-accent/25 px-3 py-1.5 text-center"
+            role="note"
+            aria-label="AI disclosure"
+          >
+            <p className="text-[11px] sm:text-xs font-medium text-foreground">
+              <span className="font-bold text-accent">AI-Generated:</span> Images and copy on this page are produced by AI for inspiration only — not a guarantee of final build, materials, cost, or scope.
+            </p>
+          </div>
+
           {/* Step indicator */}
           <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-6 md:mb-10">
             {stepLabels.map(({ key, label }, idx) => {

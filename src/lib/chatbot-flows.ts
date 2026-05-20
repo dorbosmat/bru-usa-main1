@@ -37,8 +37,13 @@ export const PREDEFINED_QA: PredefinedQA[] = [
   },
   {
     triggers: ["how fast", "how soon", "how quickly", "someone come", "come out", "emergency", "urgent", "asap", "right away"],
+    // AI-DISCLOSURE-TODO: previously claimed "we can often respond same day"
+    // — an availability promise the platform cannot substantiate. Now
+    // explicitly redirects active emergencies to 911 / local emergency
+    // services and offers the free-quote path for non-urgent requests
+    // without a time-window guarantee.
     answer:
-      "For emergencies (leaks, storm damage), we can often respond **same day**. For scheduled work, most projects start within **1–2 weeks**.\n\nNeed someone fast? I can get you a **free quote** and we'll prioritize your request!",
+      "If this is an active emergency (water actively flooding, structural collapse, gas, fire, or sparks), please call **911** or a local emergency service right away — this chat is automated and can't dispatch help.\n\nFor non-emergencies, I can add you to the **free quote** list and the Build Right USA team will reach out as soon as quote requests reopen.",
   },
   {
     triggers: ["do you work in", "my area", "serve my", "available in", "come to my", "your area", "do you cover"],

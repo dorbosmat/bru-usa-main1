@@ -8,27 +8,33 @@ import beforeBathroom from "@/assets/ai-preview/before-bathroom.png";
 import afterBathroom from "@/assets/ai-preview/after-bathroom.png";
 
 // TODO(i18n): move section copy below into LanguageContext when localizing.
+// AI-DISCLOSURE-TODO: this section markets an AI tool. The eyebrow,
+// subtext, and disclosure footnote together establish "this output is
+// AI-generated" so users do not mistake the preview for a real photograph
+// or a contractor's actual rendering.
 const COPY = {
-  eyebrow: "AI Renovation Preview",
+  eyebrow: "AI-Powered Renovation Preview",
   headline: "See Your Renovation",
   headlineAccent: "Before You Build",
   subtext:
-    "Upload a photo of your space and our AI generates a photorealistic preview in seconds — so you can decide with confidence before any work starts.",
+    "Upload a photo of your space and our AI generates an illustrative preview in seconds — so you can explore ideas before any work starts.",
   bullets: [
-    "Photorealistic results in seconds.",
+    "AI-generated illustration, ready in seconds.",
     "Try kitchen, bath, or full remodel.",
     "Free preview — no credit card.",
   ],
   ctaPrimary: "Try AI Preview",
   ctaSecondary: "See how it works",
   beforeLabel: "Before",
-  afterLabel: "After",
+  afterLabel: "After (AI)",
   step1Eyebrow: "Step 1",
   step1Label: "Upload a photo",
   step2Eyebrow: "Step 2",
   step2Label: "AI generates preview",
   step3Eyebrow: "Step 3",
   step3Label: "See your result",
+  disclosure:
+    "AI-generated illustration for inspiration only — not a guarantee of final build, materials, cost, or scope.",
 };
 
 const AiPreviewSection = () => {
@@ -113,6 +119,11 @@ const AiPreviewSection = () => {
                 <CheckCircle size={12} className="text-accent" aria-hidden="true" />
                 {t.trustFastResponse}
               </span>
+            </p>
+            {/* AI-DISCLOSURE-TODO: persistent disclosure so the AI nature of
+                the output is visible above the fold, not buried in a tooltip. */}
+            <p className="mt-3 text-[11px] leading-snug text-muted-foreground italic">
+              {COPY.disclosure}
             </p>
           </div>
 

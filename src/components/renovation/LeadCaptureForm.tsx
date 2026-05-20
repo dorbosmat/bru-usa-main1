@@ -156,8 +156,14 @@ export default function LeadCaptureForm({ previewUrl, projectType, style, onBack
                                   <Sparkles size={12} />One last step
                         </div>
                         <h2 className="font-display text-xl md:text-2xl font-bold text-foreground">Unlock your full renovation preview</h2>
+                        {/* AI-DISCLOSURE-TODO: this form sits inside the AI
+                            Preview flow. Copy now avoids promising "a licensed
+                            contractor will contact you" — lead submission is
+                            currently gated off, and even when re-enabled the
+                            platform refers to independent contractors rather
+                            than employing them. */}
                         <p className="text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
-                                  Enter your details to reveal the full before &amp; after — and we&apos;ll connect you with a <strong className="text-foreground">licensed contractor</strong>.
+                                  Add your details to reveal the full AI-generated before &amp; after — and to be added to the Build Right USA list for a free quote once requests reopen.
                         </p>
                 </div>
           
@@ -226,8 +232,11 @@ export default function LeadCaptureForm({ previewUrl, projectType, style, onBack
                         <Button type="submit" variant="cta" size="lg" className="w-full text-base py-4" disabled={submitting}>
                           {submitting ? (<><Loader2 className="animate-spin mr-2" size={18} />Submitting…</>) : (<><Sparkles size={16} className="mr-2" />Show My Renovation Preview</>)}
                         </Button>
+                        {/* AI-DISCLOSURE-TODO: footnote no longer promises a
+                            specific contractor response window — that promise
+                            was unverifiable and dangerous if missed. */}
                         <p className="text-[11px] text-center text-muted-foreground leading-relaxed">
-                                  A licensed contractor will contact you within 2 hours. No spam, no pressure.
+                            No spam, no pressure. Submission isn't live yet — see the maintenance notice on the next screen.
                         </p>
                 </form>
           </div>
