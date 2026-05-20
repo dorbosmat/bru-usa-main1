@@ -1,4 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { checkRateLimit, logAbuse } from "../_shared/rate-limit.ts";
+import { verifyTurnstile } from "../_shared/turnstile.ts";
 
 // ─── Security Configuration ─────────────────────────────────────────────────
 // CORS-TODO: shared origin allowlist. The previous behavior fell back to
@@ -410,11 +412,46 @@ serve(async (req) => {
   }
 
   const ip = getClientIP(req);
+
+  // RATE-LIMIT-TODO: legacy in-memory limiter — kept enabled so the
+  // chat function retains its existing protection during the
+  // Liability Containment Sprint. Remove this block when the
+  // persistent shadow-mode counter (below) has a week of data and is
+  // flipped to mode: "enforce" via the ENFORCE_RATE_LIMIT secret.
   if (isRateLimited(ip)) {
     return new Response(
       JSON.stringify({ error: "Too many requests. Please wait a moment." }),
       { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
+  }
+
+  // SHADOW MODE — persistent rate-limit observation. Does NOT reject
+  // requests today; only records bucket counts in rate_limit_buckets
+  // and writes a row to abuse_events on shadowed exceedance. To enforce,
+  // set ENFORCE_RATE_LIMIT=1 in Supabase secrets.
+  await checkRateLimit({
+    endpoint: "chat:stream",
+    ip,
+    limit: RATE_LIMIT,        // mirror legacy limit for parity
+    windowSeconds: WINDOW_MS / 1000,
+    // mode omitted → inherits from ENFORCE_RATE_LIMIT env or defaults to "observe"
+  });
+
+  // TURNSTILE-TODO: when the chat widget starts sending a Turnstile
+  // token (frontend wires it in via useTurnstile), pull `req.headers
+  // .get("x-turnstile-token")` here and pass to verifyTurnstile(token,
+  // { remoteIp: ip, expectedAction: "chat" }). For now we run the
+  // helper in shadow mode — it returns valid: true with reason
+  // "dev-bypass-no-secret" until TURNSTILE_SECRET_KEY is set.
+  const turnstileToken = req.headers.get("x-turnstile-token");
+  const turnstile = await verifyTurnstile(turnstileToken, { remoteIp: ip, expectedAction: "chat" });
+  if (!turnstile.valid) {
+    // Shadow mode: log only, do NOT reject yet.
+    await logAbuse({
+      event_type: "turnstile_observed_invalid",
+      endpoint: "chat:stream",
+      details: { reason: turnstile.reason },
+    });
   }
 
   try {

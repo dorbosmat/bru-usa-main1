@@ -1,4 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { checkRateLimit, logAbuse } from "../_shared/rate-limit.ts";
+import { verifyTurnstile } from "../_shared/turnstile.ts";
 
 // CORS-TODO: shared origin allowlist. Move to a shared deno module once
 // the edge-function count grows. Wildcard "*" is no longer accepted.
@@ -222,10 +224,47 @@ class PaymentError extends Error {
 }
 
 // ─── HTTP Handler ───
+function getClientIP(req: Request): string {
+  return (
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    req.headers.get("cf-connecting-ip") ??
+    "unknown"
+  );
+}
+
 serve(async (req) => {
   const corsHeaders = corsHeadersFor(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  const ip = getClientIP(req);
+
+  // SHADOW MODE — observe-only persistent rate limiter. AI Renovation
+  // is the most expensive endpoint (paid Gemini calls via Lovable AI).
+  // Limit is intentionally tight: 5 generations per IP per day.
+  // When ready to enforce, set ENFORCE_RATE_LIMIT=1 in Supabase secrets
+  // OR pass mode: "enforce" here.
+  // RATE-LIMIT-TODO: tune the daily cap from real abuse_events data
+  // before enforcing.
+  await checkRateLimit({
+    endpoint: "ai-renovation:generate",
+    ip,
+    limit: 5,
+    windowSeconds: 24 * 60 * 60,
+  });
+
+  // SHADOW MODE — Turnstile observation. TURNSTILE-TODO: once the
+  // frontend RenovationPreview flow sends an x-turnstile-token header,
+  // flip this to enforce by rejecting requests with valid: false.
+  const turnstileToken = req.headers.get("x-turnstile-token");
+  const turnstile = await verifyTurnstile(turnstileToken, { remoteIp: ip, expectedAction: "ai-renovation" });
+  if (!turnstile.valid) {
+    await logAbuse({
+      event_type: "turnstile_observed_invalid",
+      endpoint: "ai-renovation:generate",
+      details: { reason: turnstile.reason },
+    });
   }
 
   try {

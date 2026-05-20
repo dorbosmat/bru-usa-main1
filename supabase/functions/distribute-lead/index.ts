@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { checkRateLimit } from "../_shared/rate-limit.ts";
 
 // CORS-TODO: shared origin allowlist. Move to a shared deno module once
 // the edge-function count grows. Wildcard "*" is no longer accepted.
@@ -25,11 +26,29 @@ function corsHeadersFor(req: Request): Record<string, string> {
   };
 }
 
+function getClientIP(req: Request): string {
+  return (
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    req.headers.get("cf-connecting-ip") ??
+    "unknown"
+  );
+}
+
 Deno.serve(async (req) => {
   const corsHeaders = corsHeadersFor(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  // SHADOW MODE — distribute-lead is wired but the client invocation is
+  // commented out in LeadForm (Task 1). Observe-only counter here lets
+  // us see if anything else hits the endpoint while the form is gated.
+  await checkRateLimit({
+    endpoint: "distribute-lead:invoke",
+    ip: getClientIP(req),
+    limit: 30,
+    windowSeconds: 60,
+  });
 
   try {
     const { lead_id } = await req.json();

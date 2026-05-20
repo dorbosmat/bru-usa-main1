@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { checkRateLimit } from "../_shared/rate-limit.ts";
 
 // CORS-TODO: shared origin allowlist. Move to a shared deno module once
 // the edge-function count grows. Wildcard "*" is no longer accepted.
@@ -84,11 +85,32 @@ function buildHtml(lead: Record<string, any>): string {
   `;
 }
 
+function getClientIP(req: Request): string {
+  return (
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    req.headers.get("cf-connecting-ip") ??
+    "unknown"
+  );
+}
+
 Deno.serve(async (req) => {
   const corsHeaders = corsHeadersFor(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 200, headers: corsHeaders });
   }
+
+  // SHADOW MODE — when the new submit pipeline lands, notify-lead will
+  // be invoked server-to-server only (never directly from a browser).
+  // Until then, observe-only per-IP rate-limit data here helps us
+  // characterize current invocation patterns. RATE-LIMIT-TODO: once the
+  // new pipeline is in place, drop this and reject any request whose
+  // caller isn't the submit function.
+  await checkRateLimit({
+    endpoint: "notify-lead:invoke",
+    ip: getClientIP(req),
+    limit: 30,
+    windowSeconds: 60,
+  });
 
   try {
     const body = await req.json().catch(() => null); if (!body) { return new Response(JSON.stringify({ error: "Invalid JSON body" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }); } const { lead_id } = body;
