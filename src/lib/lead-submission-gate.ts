@@ -33,12 +33,13 @@ export const MAINTENANCE_MESSAGE =
 
 export const MAINTENANCE_HEADLINE = "We're upgrading our contractor network";
 
-// PHONE-TODO: Provision real US callback line (OpenPhone / Twilio) and fill
-// both constants below. CALLBACK_PHONE_E164 must be in E.164 format (leading
-// "+1" then ten digits) so `tel:` links work cross-platform. While the value
-// is empty, MaintenanceHoldingState renders a "Phone line being provisioned"
-// notice instead of a live tap-to-call. Format example: "+1XXXXXXXXXX" /
-// "(XXX) XXX-XXXX" — never use a fictional Hollywood placeholder number.
-export const CALLBACK_PHONE_E164 = "";                  // E.164, e.g. +1<area><exchange><line>
-export const CALLBACK_PHONE_DISPLAY = "";               // Pretty US format, e.g. (XXX) XXX-XXXX
-export const CALLBACK_HOURS = "Mon–Fri · 8AM–6PM EST";
+// PHONE-TODO (Task 14): the callback line now lives in ONE place —
+// src/lib/phone.ts — shared with COMPANY_PHONE so the two can never drift.
+// These re-exports keep existing imports (e.g. MaintenanceHoldingState) working.
+// To provision the real US number, edit src/lib/phone.ts only.
+export {
+  CALLBACK_PHONE_E164,
+  CALLBACK_PHONE_DISPLAY,
+  CALLBACK_HOURS,
+  hasRealCallbackNumber,
+} from "./phone";

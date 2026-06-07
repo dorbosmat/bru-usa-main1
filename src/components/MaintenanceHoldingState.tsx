@@ -4,6 +4,7 @@ import {
   CALLBACK_HOURS,
   CALLBACK_PHONE_DISPLAY,
   CALLBACK_PHONE_E164,
+  hasRealCallbackNumber,
   MAINTENANCE_HEADLINE,
   MAINTENANCE_MESSAGE,
 } from "@/lib/lead-submission-gate";
@@ -24,9 +25,6 @@ interface Props {
   variant?: Variant;
   className?: string;
 }
-
-const hasRealCallbackNumber =
-  CALLBACK_PHONE_E164.length > 0 && CALLBACK_PHONE_DISPLAY.length > 0;
 
 export default function MaintenanceHoldingState({
   variant = "card",

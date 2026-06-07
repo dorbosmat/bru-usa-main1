@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import TurnstileWidget, { type TurnstileWidgetHandle } from "@/components/TurnstileWidget";
 import { SERVICES, SERVICE_AREAS } from "@/lib/constants";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -61,6 +62,9 @@ const LeadForm = ({
   const [consentChecked,     setConsentChecked]     = useState(false);
   const [submittedName,      setSubmittedName]      = useState("");
   const [submittedService,   setSubmittedService]   = useState("");
+  // Turnstile: renders nothing and getToken() returns a dev-bypass sentinel
+  // while VITE_TURNSTILE_SITE_KEY is unset, so there is no UX change today.
+  const turnstileRef = useRef<TurnstileWidgetHandle>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,6 +105,10 @@ const LeadForm = ({
     // lead_consent_log, (4) invokes notify-lead server-to-server so the
     // client never touches it. Direct supabase.insert / Zapier fetch /
     // client-invoked notify-lead are all removed.
+    // Turnstile token (dev-bypass sentinel until a real site key is set; the
+    // submit-lead edge function soft-passes the sentinel until its secret is
+    // configured — see LEAD-REOPENING-CHECKLIST.md).
+    const turnstileToken = await turnstileRef.current?.getToken();
     const result = await submitLeadV1({
       name: form.name,
       phone: form.phone,
@@ -111,8 +119,7 @@ const LeadForm = ({
       message: form.details,
       landing_page: landingPage || window.location.pathname,
       honeypot,
-      // TURNSTILE-TODO: pass turnstileToken once <TurnstileWidget /> is mounted.
-    });
+    }, { turnstileToken });
 
     if (!result.success) {
       if (result.maintenance) {
@@ -255,6 +262,10 @@ const LeadForm = ({
       </label>
 
       <TrustStrip className="py-1" />
+
+      {/* Turnstile readiness (Task 14): invisible widget, renders nothing while
+          VITE_TURNSTILE_SITE_KEY is unset. No enforcement until keys exist. */}
+      <TurnstileWidget ref={turnstileRef} action="submit-lead" />
 
       <Button type="submit" variant="cta" size="lg" className="w-full" disabled={phase !== "idle"}>
         {phase !== "idle" ? <><Loader2 className="animate-spin mr-2" size={18} />{t.formSubmitting}</> : t.formCta}

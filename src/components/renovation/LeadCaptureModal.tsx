@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -8,6 +8,7 @@ import MaintenanceHoldingState from "@/components/MaintenanceHoldingState";
 import { LEAD_SUBMISSION_ENABLED } from "@/lib/lead-submission-gate";
 import { submitLeadV1 } from "@/lib/lead-submit-client";
 import { CURRENT_CONSENT } from "@/lib/consent-text";
+import TurnstileWidget, { type TurnstileWidgetHandle } from "@/components/TurnstileWidget";
 import { Link } from "react-router-dom";
 
 interface LeadCaptureModalProps {
@@ -35,6 +36,8 @@ const LeadCaptureModal = ({ projectType, style, onLeadCaptured }: LeadCaptureMod
   const [done, setDone] = useState(false);
   const [honeypot, setHoneypot] = useState("");
   const [consentChecked, setConsentChecked] = useState(false);
+  // Turnstile: no-op (renders nothing, sentinel token) while no site key is set.
+  const turnstileRef = useRef<TurnstileWidgetHandle>(null);
 
   const inputClass = "w-full rounded-lg border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring";
 
@@ -75,6 +78,8 @@ const LeadCaptureModal = ({ projectType, style, onLeadCaptured }: LeadCaptureMod
     // lead_consent_log, invokes notify-lead server-to-server. distribute-
     // lead is intentionally paused server-side until real contractors are
     // onboarded.
+    // Turnstile token (dev-bypass sentinel until keys exist — see checklist).
+    const turnstileToken = await turnstileRef.current?.getToken();
     const result = await submitLeadV1({
       name: form.name,
       phone: form.phone,
@@ -85,8 +90,7 @@ const LeadCaptureModal = ({ projectType, style, onLeadCaptured }: LeadCaptureMod
       message: `AI Preview Lead | Style: ${style} | Project: ${projectType}`,
       landing_page: "/renovation-preview",
       honeypot,
-      // TURNSTILE-TODO: pass turnstileToken when widget mounts.
-    });
+    }, { turnstileToken });
 
     if (!result.success) {
       if (!result.maintenance) {
@@ -152,6 +156,9 @@ const LeadCaptureModal = ({ projectType, style, onLeadCaptured }: LeadCaptureMod
             <Link to="/sms-consent" className="text-accent hover:underline" onClick={(e) => e.stopPropagation()}>SMS Consent</Link>.
           </span>
         </label>
+
+        {/* Turnstile readiness (Task 14): invisible, no enforcement until keys exist. */}
+        <TurnstileWidget ref={turnstileRef} action="submit-lead" />
 
         <Button type="submit" variant="cta" size="lg" className="w-full" disabled={submitting}>
           {submitting ? <Loader2 className="animate-spin mr-2" size={18} /> : null}

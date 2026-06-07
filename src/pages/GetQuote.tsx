@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
+import TurnstileWidget, { type TurnstileWidgetHandle } from "@/components/TurnstileWidget";
 import { SERVICES, SERVICE_AREAS } from "@/lib/constants";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -49,6 +50,8 @@ export default function GetQuote() {
     const [consentChecked, setConsentChecked] = useState(false);
     const [submittedName, setSubmittedName] = useState("");
     const [submittedService, setSubmittedService] = useState("");
+    // Turnstile: no-op (renders nothing, sentinel token) while no site key is set.
+    const turnstileRef = useRef<TurnstileWidgetHandle>(null);
 
   const set = (k: string, v: string) => setForm(p => ({ ...p, [k]: v }));
 
@@ -92,6 +95,8 @@ export default function GetQuote() {
         // (Sprint Task 7). Server captures IP / UA / consent / source_url /
         // writes immutable lead_consent_log row / invokes notify-lead
         // server-to-server. See src/lib/lead-submit-client.ts.
+        // Turnstile token (dev-bypass sentinel until keys exist — see checklist).
+        const turnstileToken = await turnstileRef.current?.getToken();
         const result = await submitLeadV1({
                 name: form.full_name,
                 phone: form.phone,
@@ -101,8 +106,7 @@ export default function GetQuote() {
                 service_area: form.city,
                 message: composedMessage,
                 honeypot,
-                // TURNSTILE-TODO: pass turnstileToken when widget mounts.
-        });
+        }, { turnstileToken });
 
         if (!result.success) {
                 if (result.maintenance) {
@@ -201,6 +205,8 @@ export default function GetQuote() {
                                                     </span>
                                     </label>
                                     <TrustStrip className="py-1" />
+                                    {/* Turnstile readiness (Task 14): invisible, no enforcement until keys exist. */}
+                                    <TurnstileWidget ref={turnstileRef} action="submit-lead" />
                                     <Button type="submit" variant="cta" size="lg" className="w-full" disabled={submitting}>
                                       {submitting ? <><Loader2 className="animate-spin mr-2 h-4 w-4" />{t.formSubmitting}</> : t.getQuoteSubmit}
                                     </Button>

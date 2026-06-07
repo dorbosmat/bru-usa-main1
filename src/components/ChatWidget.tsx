@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { LEAD_SUBMISSION_ENABLED } from "@/lib/lead-submission-gate";
 import { submitLeadV1 } from "@/lib/lead-submit-client";
+import TurnstileWidget, { type TurnstileWidgetHandle } from "@/components/TurnstileWidget";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 // ─── Config ──────────────────────────────────────────────────────────────────
@@ -287,6 +288,8 @@ export default function ChatWidget() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef  = useRef<HTMLInputElement>(null);
+  // Turnstile: no-op (renders nothing, sentinel token) while no site key is set.
+  const turnstileRef = useRef<TurnstileWidgetHandle>(null);
   const isMobile  = useIsMobile();
 
   // ── focus management ──
@@ -434,6 +437,13 @@ export default function ChatWidget() {
     // LEAD-REOPEN-TODO: post-gate path uses submit-lead edge function
     // (Sprint Task 7). Server captures IP/UA/consent/source_url and
     // writes immutable lead_consent_log row.
+    //
+    // TCPA-TODO (HARD BLOCKER — see LEAD-REOPENING-CHECKLIST.md): this chat
+    // flow still has NO explicit consent step. Turnstile is wired below, but
+    // chat lead capture must NOT be reopened until a consent confirmation is
+    // added before this call (submitLeadV1 sends consent.given=true, which
+    // would be untrue for chat today).
+    const turnstileToken = await turnstileRef.current?.getToken();
     const result = await submitLeadV1({
       name: data.name,
       phone,
@@ -442,8 +452,7 @@ export default function ChatWidget() {
       service: data.service || "General",
       service_area: locFb,
       message: buildSummary() + (locFb && !zipVal ? ` | Location: ${locFb}` : ""),
-      // TURNSTILE-TODO: pass turnstileToken when chat widget integrates it.
-    });
+    }, { turnstileToken });
 
     if (!result.success) {
       if (result.maintenance) {
@@ -679,6 +688,8 @@ addMsg("bot", cleanReply, qr);
           className="fixed left-0 top-0 z-[10000] flex w-screen max-w-full touch-pan-y flex-col bg-card border border-border shadow-2xl overflow-hidden h-[100dvh] md:inset-auto md:bottom-6 md:left-4 md:top-auto md:w-[390px] md:h-[560px] md:rounded-2xl"
           style={mobileChatStyle}
         >
+          {/* Turnstile readiness (Task 14): invisible, no enforcement until keys exist. */}
+          <TurnstileWidget ref={turnstileRef} action="submit-lead" />
           {/* Header */}
           <div className="flex items-center justify-between bg-primary px-4 py-3 pt-[calc(0.75rem+env(safe-area-inset-top))] shrink-0">
             <div className="flex items-center gap-2.5">

@@ -10,6 +10,7 @@ import MaintenanceHoldingState from "@/components/MaintenanceHoldingState";
 import { LEAD_SUBMISSION_ENABLED } from "@/lib/lead-submission-gate";
 import { submitLeadV1 } from "@/lib/lead-submit-client";
 import { CURRENT_CONSENT } from "@/lib/consent-text";
+import TurnstileWidget, { type TurnstileWidgetHandle } from "@/components/TurnstileWidget";
 import { Link } from "react-router-dom";
 
 interface LeadCaptureFormProps {
@@ -45,6 +46,8 @@ export default function LeadCaptureForm({ previewUrl, projectType, style, onBack
     const [honeypot, setHoneypot] = useState("");
     const [consentChecked, setConsentChecked] = useState(false);
     const formRef = useRef<HTMLDivElement>(null);
+    // Turnstile: no-op (renders nothing, sentinel token) while no site key is set.
+    const turnstileRef = useRef<TurnstileWidgetHandle>(null);
 
   useEffect(() => {
         formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -94,6 +97,8 @@ export default function LeadCaptureForm({ previewUrl, projectType, style, onBack
         // LEAD-REOPEN-TODO: post-gate path uses submit-lead edge function
         // (Sprint Task 7). Includes consent + IP + UA + source_url + writes
         // lead_consent_log. notify-lead is invoked server-to-server.
+        // Turnstile token (dev-bypass sentinel until keys exist — see checklist).
+        const turnstileToken = await turnstileRef.current?.getToken();
         const result = await submitLeadV1({
                 name: form.name.trim(),
                 phone: form.phone,
@@ -105,8 +110,7 @@ export default function LeadCaptureForm({ previewUrl, projectType, style, onBack
                 landing_page: "/renovation-preview",
                 source_page: "/renovation-preview",
                 honeypot,
-                // TURNSTILE-TODO: pass turnstileToken when widget mounts.
-        });
+        }, { turnstileToken });
 
         if (!result.success) {
                 if (!result.maintenance) {
@@ -229,6 +233,9 @@ export default function LeadCaptureForm({ previewUrl, projectType, style, onBack
                         </div>
                 
                         <TrustStrip layout="vertical" className="px-1 py-1" />
+
+                        {/* Turnstile readiness (Task 14): invisible, no enforcement until keys exist. */}
+                        <TurnstileWidget ref={turnstileRef} action="submit-lead" />
 
                         {/* CONSENT-TODO: required by submit-lead edge function. Version is
                             sourced from src/lib/consent-text.ts. */}

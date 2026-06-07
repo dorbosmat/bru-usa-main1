@@ -71,14 +71,13 @@ export const SERVICES = [
     features: ["Basement Finishing", "Room Additions", "Open-Concept Conversions", "Structural Modifications", "Permit Management"],
   },
 ];
-// PHONE-TODO: the previous value was the fictional Hollywood placeholder
-// "(555) 123-4567". It is now an empty string until a real US callback line
-// is provisioned (OpenPhone / Twilio). Every consumer that interpolates
-// COMPANY_PHONE MUST guard against the empty string and fall back to honest
-// copy ("Callback line coming soon" / "Use the contact form when it reopens"
-// / "Email support@buildright-usa.com"). When you fill this in, also update
-// CALLBACK_PHONE_E164 / CALLBACK_PHONE_DISPLAY in src/lib/lead-submission-gate.ts.
-export const COMPANY_PHONE = "";
+// PHONE-TODO (Task 14): COMPANY_PHONE is now derived from the single source of
+// truth in src/lib/phone.ts (it equals CALLBACK_PHONE_DISPLAY — one number for
+// the whole site). It is "" until a real US line is provisioned there. Every
+// consumer that interpolates COMPANY_PHONE MUST still guard against the empty
+// string and fall back to honest copy / the contact form / email. The previous
+// fictional "(555) 123-4567" placeholder must never return.
+export { COMPANY_PHONE } from "./phone";
 export const COMPANY_EMAIL = "info@buildright-usa.com";
 export const COMPANY_ADDRESS = "11401 NW 12th St, Miami, FL 33172";
 
