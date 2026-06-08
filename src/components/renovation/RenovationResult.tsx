@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import BeforeAfterSlider from "./BeforeAfterSlider";
 import PriceEstimate from "./PriceEstimate";
 import { Button } from "@/components/ui/button";
-import { Phone, MessageSquare, CalendarCheck, ArrowLeft, Sparkles, Hourglass } from "lucide-react";
+import { MessageSquare, ArrowLeft, Sparkles, Hourglass } from "lucide-react";
 import { Link } from "react-router-dom";
 import { trackFunnelStep } from "@/lib/analytics";
 
@@ -79,26 +79,24 @@ const RenovationResult = ({ beforeImage, afterImage, projectType, style, onReset
                         <h3 className="font-display font-bold text-foreground text-center text-base md:text-lg">
                                   Want a real quote for this renovation?
                         </h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                  <Link to="/get-a-quote" className="block" onClick={() => trackFunnelStep("cta_tap", { label: "get_exact_quote" })}>
-                                              <Button variant="cta" className="w-full gap-2" size="lg">
-                                                            <MessageSquare size={16} />
-                                                            Get Exact Quote
-                                              </Button>
+                        {/* T2: one dominant primary CTA; secondary contact options
+                            collapsed into a single demoted text link. */}
+                        <Link to="/get-a-quote" className="block" onClick={() => trackFunnelStep("cta_tap", { label: "get_exact_quote" })}>
+                                  <Button variant="cta" className="w-full gap-2" size="lg">
+                                              <MessageSquare size={16} />
+                                              Get Exact Quote
+                                  </Button>
+                        </Link>
+                        <p className="text-center text-sm text-muted-foreground">
+                                  Prefer to talk first?{" "}
+                                  <Link
+                                              to="/contact"
+                                              className="font-medium text-accent hover:underline"
+                                              onClick={() => trackFunnelStep("cta_tap", { label: "speak_with_specialist" })}
+                                  >
+                                              Speak with a specialist
                                   </Link>
-                                  <Link to="/contact" className="block" onClick={() => trackFunnelStep("cta_tap", { label: "speak_with_specialist" })}>
-                                              <Button variant="outline" className="w-full gap-2" size="lg">
-                                                            <Phone size={16} />
-                                                            Speak With Specialist
-                                              </Button>
-                                  </Link>
-                                  <Link to="/contact" className="block" onClick={() => trackFunnelStep("cta_tap", { label: "book_a_callback" })}>
-                                              <Button variant="outline" className="w-full gap-2" size="lg">
-                                                            <CalendarCheck size={16} />
-                                                            Book a Callback
-                                              </Button>
-                                  </Link>
-                        </div>
+                        </p>
                 </div>
           </div>
         );
