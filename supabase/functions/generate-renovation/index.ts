@@ -8,6 +8,22 @@ const corsHeaders = {
 
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
 
+// ─── T5: server-side image validation (defense-in-depth) ───
+// Backstops the client-side guard (T3). These checks run BEFORE any paid
+// OpenAI/Gemini call so malformed or oversized payloads cost nothing.
+const ALLOWED_IMAGE_MIME = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+const MAX_DECODED_IMAGE_BYTES = 8 * 1024 * 1024; // 8 MB ceiling (client targets ~2 MB)
+
+// Estimate decoded byte size from a base64 string WITHOUT allocating/decoding
+// the whole payload — a cheap guard to run before any external API call.
+function approxBase64Bytes(b64: string): number {
+  const raw = b64.includes(",") ? b64.slice(b64.lastIndexOf(",") + 1) : b64;
+  const len = raw.length;
+  if (len === 0) return 0;
+  const padding = raw.endsWith("==") ? 2 : raw.endsWith("=") ? 1 : 0;
+  return Math.floor((len * 3) / 4) - padding;
+}
+
 // ---------------------------------------------------------------------------
 // Helpers: project-type normalization + negative-request parsing
 // ---------------------------------------------------------------------------
@@ -126,6 +142,45 @@ Deno.serve(async (req: Request) => {
     }
 
     const mimeType = imageType || "image/jpeg";
+
+    // ── T5: validate MIME + decoded size BEFORE any paid OpenAI/Gemini call ──
+    const normalizedMime = String(mimeType).toLowerCase().trim();
+    if (!ALLOWED_IMAGE_MIME.includes(normalizedMime)) {
+      console.log(
+        "[generate-renovation] early return reason:",
+        "unsupported image mime",
+        normalizedMime,
+      );
+      return new Response(
+        JSON.stringify({
+          success: false,
+          errorCode: "UNSUPPORTED_IMAGE_TYPE",
+          message: "Unsupported image type. Please upload a JPG, PNG, or WebP image.",
+          received: normalizedMime,
+        }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    const decodedBytes = approxBase64Bytes(imageBase64);
+    if (decodedBytes > MAX_DECODED_IMAGE_BYTES) {
+      console.log(
+        "[generate-renovation] early return reason:",
+        "image too large",
+        decodedBytes,
+      );
+      return new Response(
+        JSON.stringify({
+          success: false,
+          errorCode: "IMAGE_TOO_LARGE",
+          message: "That image is too large. Please upload a photo under 8 MB.",
+          maxBytes: MAX_DECODED_IMAGE_BYTES,
+          receivedBytes: decodedBytes,
+        }),
+        { status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     const expectedCategory = normalizeSpaceLabel(projectType);
 
     // -----------------------------------------------------------------------
