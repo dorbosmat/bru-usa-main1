@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import Layout from "@/components/Layout";
 import PhotoUpload from "@/components/renovation/PhotoUpload";
@@ -7,6 +7,7 @@ import LeadCaptureForm from "@/components/renovation/LeadCaptureForm";
 import RenovationResult from "@/components/renovation/RenovationResult";
 import { toast } from "@/hooks/use-toast";
 import { generateRenovation } from "@/services/renovation";
+import { trackFunnelStep } from "@/lib/analytics";
 import { Loader2, Sparkles } from "lucide-react";
 import aiBg from "@/assets/ai-preview/ai-preview-bg.jpg";
 
@@ -63,6 +64,11 @@ const RenovationPreview = () => {
   const [afterImage, setAfterImage] = useState("");
   const sectionRef = useRef<HTMLDivElement>(null);
 
+  // T1 analytics: fire the top-of-funnel event once when the flow mounts.
+  useEffect(() => {
+    trackFunnelStep("upload_start");
+  }, []);
+
   const scrollToTop = () => {
     sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
@@ -70,6 +76,7 @@ const RenovationPreview = () => {
   const handlePhotoSelected = (f: File, preview: string) => {
     setFile(f);
     setPreviewUrl(preview);
+    trackFunnelStep("photo_selected");
     setStep("configure");
     setTimeout(scrollToTop, 100);
   };
@@ -90,17 +97,27 @@ const RenovationPreview = () => {
   ) => {
     if (!file) return;
     setStep("generating");
+    trackFunnelStep("generation_start", { project_type: projectType || "", style: style || "" });
     setTimeout(scrollToTop, 100);
     try {
       const result = await generateRenovation(
         { imageFile: file, projectType, style, budget, region, clientType, personalRequest },
-        (status) => console.log("Progress:", status)
+        () => { /* progress status intentionally not logged */ }
       );
+      // The service returns a placeholder with an empty imageUrl on soft
+      // failure (it never throws), so branch on the actual image to keep the
+      // funnel honest about real successes vs. silent failures.
+      if (result.imageUrl) {
+        trackFunnelStep("generation_complete", { project_type: projectType || "", style: style || "" });
+      } else {
+        trackFunnelStep("generation_failed", { reason: "no_image" });
+      }
       setAfterImage(result.imageUrl);
       setStep("result");
       setTimeout(scrollToTop, 100);
     } catch (err: any) {
       console.error("Generation error:", err);
+      trackFunnelStep("generation_failed", { reason: "exception" });
       toast({
         title: "Generation failed",
         description: err?.message ?? "Please try again.",

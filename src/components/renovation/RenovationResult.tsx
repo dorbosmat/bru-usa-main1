@@ -1,8 +1,10 @@
+import { useEffect, useRef } from "react";
 import BeforeAfterSlider from "./BeforeAfterSlider";
 import PriceEstimate from "./PriceEstimate";
 import { Button } from "@/components/ui/button";
 import { Phone, MessageSquare, CalendarCheck, ArrowLeft, Sparkles, Hourglass } from "lucide-react";
 import { Link } from "react-router-dom";
+import { trackFunnelStep } from "@/lib/analytics";
 
 interface RenovationResultProps {
     beforeImage: string;
@@ -14,6 +16,24 @@ interface RenovationResultProps {
 
 const RenovationResult = ({ beforeImage, afterImage, projectType, style, onReset }: RenovationResultProps) => {
     const hasAfter = !!(afterImage && afterImage.length > 0);
+
+    // T1 analytics: fire reveal_viewed once when a real before/after appears,
+    // and slider_interacted at most once per result.
+    const revealTrackedRef = useRef(false);
+    const sliderTrackedRef = useRef(false);
+
+    useEffect(() => {
+          if (hasAfter && !revealTrackedRef.current) {
+                revealTrackedRef.current = true;
+                trackFunnelStep("reveal_viewed", { project_type: projectType || "", style: style || "" });
+          }
+    }, [hasAfter, projectType, style]);
+
+    const handleSliderInteract = () => {
+          if (sliderTrackedRef.current) return;
+          sliderTrackedRef.current = true;
+          trackFunnelStep("slider_interacted");
+    };
 
     return (
           <div className="space-y-6 md:space-y-8 animate-fade-in">
@@ -35,7 +55,9 @@ const RenovationResult = ({ beforeImage, afterImage, projectType, style, onReset
                 </div>
           
             {hasAfter ? (
-                    <BeforeAfterSlider beforeSrc={beforeImage} afterSrc={afterImage} />
+                    <div onPointerDown={handleSliderInteract}>
+                      <BeforeAfterSlider beforeSrc={beforeImage} afterSrc={afterImage} />
+                    </div>
                   ) : (
                     <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden border border-border shadow-lg">
                       {beforeImage && (
@@ -58,19 +80,19 @@ const RenovationResult = ({ beforeImage, afterImage, projectType, style, onReset
                                   Want a real quote for this renovation?
                         </h3>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                  <Link to="/get-a-quote" className="block">
+                                  <Link to="/get-a-quote" className="block" onClick={() => trackFunnelStep("cta_tap", { label: "get_exact_quote" })}>
                                               <Button variant="cta" className="w-full gap-2" size="lg">
                                                             <MessageSquare size={16} />
                                                             Get Exact Quote
                                               </Button>
                                   </Link>
-                                  <Link to="/contact" className="block">
+                                  <Link to="/contact" className="block" onClick={() => trackFunnelStep("cta_tap", { label: "speak_with_specialist" })}>
                                               <Button variant="outline" className="w-full gap-2" size="lg">
                                                             <Phone size={16} />
                                                             Speak With Specialist
                                               </Button>
                                   </Link>
-                                  <Link to="/contact" className="block">
+                                  <Link to="/contact" className="block" onClick={() => trackFunnelStep("cta_tap", { label: "book_a_callback" })}>
                                               <Button variant="outline" className="w-full gap-2" size="lg">
                                                             <CalendarCheck size={16} />
                                                             Book a Callback

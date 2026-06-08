@@ -50,3 +50,35 @@ export function trackCtaClick(label: string = "Get My Free Quote") {
     page_location: window.location.pathname,
   });
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// The Reveal™ funnel taxonomy (Sprint 1 — T1)
+//
+// Ordered steps the homeowner moves through in the AI Renovation Preview flow.
+// While leads are gated OFF, the honest near-term north-star is:
+//   completion  = reveal_viewed / upload_start
+//   share/save  = (added when share UI ships)
+// Every step is emitted via trackFunnelStep, which inherits the same
+// bot/prerender filtering as trackEvent above. Pure client-side GA4 — no
+// Supabase, edge function, or PII involved.
+// ─────────────────────────────────────────────────────────────────────────────
+export type RevealFunnelStep =
+  | "upload_start"        // user lands on the upload step
+  | "photo_selected"      // a photo has been chosen
+  | "generation_start"    // generation request dispatched
+  | "generation_complete" // a usable preview was returned
+  | "generation_failed"   // generation errored / returned no image
+  | "reveal_viewed"       // the before/after result became visible
+  | "slider_interacted"   // user dragged the before/after slider (once per result)
+  | "cta_tap";            // user tapped a result-stage call-to-action
+
+export function trackFunnelStep(
+  step: RevealFunnelStep,
+  params?: Record<string, string | number | boolean>,
+) {
+  trackEvent(step, {
+    funnel: "reveal",
+    ...params,
+    page_location: window.location.pathname,
+  });
+}
