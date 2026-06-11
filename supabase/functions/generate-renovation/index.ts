@@ -1,10 +1,24 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+// CORS-TODO: shared origin allowlist (mirrors the other edge functions —
+// chat, submit-lead, notify-lead, distribute-lead, ai-renovation). Reflects
+// the request origin when allowlisted, else falls back to the canonical www.
+const ALLOWED_ORIGINS = [
+  "https://buildright-usa.com",
+  "https://www.buildright-usa.com",
+  "http://localhost:5173",
+  "http://localhost:8080",
+];
+function corsHeadersFor(req: Request): Record<string, string> {
+  const origin = req.headers.get("origin") ?? "";
+  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[1];
+  return {
+    "Access-Control-Allow-Origin": allowed,
+    "Vary": "Origin",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+  };
+}
 
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
 
@@ -107,8 +121,11 @@ function base64ToUint8Array(b64: string): Uint8Array {
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
-    return new Response("ok", { status: 200, headers: corsHeaders });
+    return new Response("ok", { status: 200, headers: corsHeadersFor(req) });
   }
+
+  // T6: per-request reflected CORS headers, reused by every response below.
+  const cors = corsHeadersFor(req);
 
   console.log("[generate-renovation] request received");
 
@@ -137,7 +154,7 @@ Deno.serve(async (req: Request) => {
       );
       return new Response(
         JSON.stringify({ error: "Missing required fields: imageBase64, projectType, style" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 400, headers: { ...cors, "Content-Type": "application/json" } }
       );
     }
 
@@ -158,7 +175,7 @@ Deno.serve(async (req: Request) => {
           message: "Unsupported image type. Please upload a JPG, PNG, or WebP image.",
           received: normalizedMime,
         }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        { status: 400, headers: { ...cors, "Content-Type": "application/json" } },
       );
     }
 
@@ -177,7 +194,7 @@ Deno.serve(async (req: Request) => {
           maxBytes: MAX_DECODED_IMAGE_BYTES,
           receivedBytes: decodedBytes,
         }),
-        { status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        { status: 413, headers: { ...cors, "Content-Type": "application/json" } },
       );
     }
 
@@ -269,7 +286,7 @@ Deno.serve(async (req: Request) => {
           confidence: detectedConfidence,
           reason: detectedReason,
         }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 200, headers: { ...cors, "Content-Type": "application/json" } }
       );
     }
 
@@ -478,7 +495,7 @@ Deno.serve(async (req: Request) => {
           message:
             "Image generation service is not configured. Please contact support.",
         }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        { status: 200, headers: { ...cors, "Content-Type": "application/json" } },
       );
     }
 
@@ -532,7 +549,7 @@ Deno.serve(async (req: Request) => {
             "We could not generate your renovation preview right now. Please try again in a moment.",
           reason: String(fetchErr).slice(0, 300),
         }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        { status: 200, headers: { ...cors, "Content-Type": "application/json" } },
       );
     }
 
@@ -551,7 +568,7 @@ Deno.serve(async (req: Request) => {
             "We could not generate your renovation preview right now. Please try again in a moment.",
           reason: `Gemini HTTP ${geminiResp.status}: ${errText.slice(0, 300)}`,
         }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        { status: 200, headers: { ...cors, "Content-Type": "application/json" } },
       );
     }
 
@@ -596,7 +613,7 @@ Deno.serve(async (req: Request) => {
             "We could not generate your renovation preview right now. Please try a different photo or request.",
           reason: String(blockReason).slice(0, 300),
         }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        { status: 200, headers: { ...cors, "Content-Type": "application/json" } },
       );
     }
 
@@ -623,13 +640,13 @@ Deno.serve(async (req: Request) => {
         detectedType: humanizeCategory(detectedCategory),
         exclusions,
       }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: 200, headers: { ...cors, "Content-Type": "application/json" } }
     );
   } catch (error) {
     console.error("generate-renovation error:", error);
     return new Response(
       JSON.stringify({ error: error.message || "Internal server error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: 500, headers: { ...cors, "Content-Type": "application/json" } }
     );
   }
 });
