@@ -38,6 +38,48 @@ function approxBase64Bytes(b64: string): number {
   return Math.floor((len * 3) / 4) - padding;
 }
 
+// ─── T7: external-call timeouts + bounded retry ───
+// Every outbound OpenAI/Gemini fetch goes through fetchWithRetry so a slow or
+// hung upstream can never stall the function indefinitely. AbortController
+// enforces a per-attempt timeout; transient failures (429 / 5xx / network /
+// timeout) are retried up to `retries` times with linear backoff. On the final
+// attempt the response is returned as-is so existing downstream handling
+// (e.g. `if (!resp.ok)`) still applies; only network/timeout exhaustion throws.
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchWithRetry(
+  url: string,
+  init: RequestInit,
+  opts: { label: string; timeoutMs: number; retries: number; backoffMs: number },
+): Promise<Response> {
+  let lastError: unknown = null;
+  for (let attempt = 0; attempt <= opts.retries; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), opts.timeoutMs);
+    try {
+      const resp = await fetch(url, { ...init, signal: controller.signal });
+      clearTimeout(timer);
+      // Retry transient upstream failures (rate limit / server error) when attempts remain.
+      if ((resp.status === 429 || resp.status >= 500) && attempt < opts.retries) {
+        await sleep(opts.backoffMs * (attempt + 1));
+        continue;
+      }
+      return resp;
+    } catch (err) {
+      clearTimeout(timer);
+      lastError = err;
+      if (attempt < opts.retries) {
+        await sleep(opts.backoffMs * (attempt + 1));
+        continue;
+      }
+    }
+  }
+  const msg = lastError instanceof Error ? lastError.message : String(lastError);
+  throw new Error(`${opts.label} request failed after ${opts.retries + 1} attempt(s): ${msg}`);
+}
+
 // ---------------------------------------------------------------------------
 // Helpers: project-type normalization + negative-request parsing
 // ---------------------------------------------------------------------------
@@ -203,7 +245,7 @@ Deno.serve(async (req: Request) => {
     // -----------------------------------------------------------------------
     // STEP 1: Vision-based GUARDRAIL
     // -----------------------------------------------------------------------
-    const guardResp = await fetch("https://api.openai.com/v1/chat/completions", {
+    const guardResp = await fetchWithRetry("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${OPENAI_API_KEY}`,
@@ -234,7 +276,7 @@ Deno.serve(async (req: Request) => {
         ],
         max_tokens: 150,
       }),
-    });
+    }, { label: "OpenAI classifier", timeoutMs: 15000, retries: 1, backoffMs: 400 });
 
     const guardData = await guardResp.json();
     if (!guardResp.ok) {
@@ -293,7 +335,7 @@ Deno.serve(async (req: Request) => {
     // -----------------------------------------------------------------------
     // STEP 2: Detailed room description
     // -----------------------------------------------------------------------
-    const visionResp = await fetch("https://api.openai.com/v1/chat/completions", {
+    const visionResp = await fetchWithRetry("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${OPENAI_API_KEY}`,
@@ -318,7 +360,7 @@ Deno.serve(async (req: Request) => {
         ],
         max_tokens: 600,
       }),
-    });
+    }, { label: "OpenAI describe", timeoutMs: 20000, retries: 1, backoffMs: 400 });
 
     const visionData = await visionResp.json();
     if (!visionResp.ok) {
@@ -514,7 +556,7 @@ Deno.serve(async (req: Request) => {
 
     let geminiResp: Response;
     try {
-      geminiResp = await fetch(geminiUrl, {
+      geminiResp = await fetchWithRetry(geminiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -538,7 +580,7 @@ Deno.serve(async (req: Request) => {
             temperature: 0.4,
           },
         }),
-      });
+      }, { label: "Gemini", timeoutMs: 60000, retries: 0, backoffMs: 0 });
     } catch (fetchErr) {
       console.error("[generate-renovation] Gemini fetch threw:", fetchErr);
       return new Response(
@@ -644,8 +686,9 @@ Deno.serve(async (req: Request) => {
     );
   } catch (error) {
     console.error("generate-renovation error:", error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return new Response(
-      JSON.stringify({ error: error.message || "Internal server error" }),
+      JSON.stringify({ error: errMsg || "Internal server error" }),
       { status: 500, headers: { ...cors, "Content-Type": "application/json" } }
     );
   }
