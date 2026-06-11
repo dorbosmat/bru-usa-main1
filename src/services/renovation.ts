@@ -46,7 +46,8 @@ export async function getProvider(): Promise<string> {
  */
 export async function generateRenovation(
     config: RenovationConfig,
-    onProgress?: (status: string) => void
+    onProgress?: (status: string) => void,
+    turnstileToken?: string | null,
   ): Promise<RenovationResult> {
     const safe = {
           projectType: config?.projectType ?? "",
@@ -71,12 +72,17 @@ export async function generateRenovation(
   onProgress?.("Generating your renovation preview...");
 
   try {
+        const headers: Record<string, string> = {
+                  Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+                  apikey: SUPABASE_ANON_KEY,
+                  "Content-Type": "application/json",
+        };
+        // T9: forward the Turnstile token (action "generate-renovation") as the
+        // x-turnstile-token header to match the edge function (T8). Single-use.
+        if (turnstileToken) headers["x-turnstile-token"] = turnstileToken;
+
         const { data, error } = await supabase.functions.invoke("generate-renovation", {
-                headers: {
-                          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-                          apikey: SUPABASE_ANON_KEY,
-                          "Content-Type": "application/json",
-                },
+                headers,
                 body: {
                           imageBase64: base64,
                           imageType,

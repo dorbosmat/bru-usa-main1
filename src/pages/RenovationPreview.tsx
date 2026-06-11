@@ -8,6 +8,7 @@ import RenovationResult from "@/components/renovation/RenovationResult";
 import { toast } from "@/hooks/use-toast";
 import { generateRenovation } from "@/services/renovation";
 import { trackFunnelStep } from "@/lib/analytics";
+import TurnstileWidget, { type TurnstileWidgetHandle } from "@/components/TurnstileWidget";
 import { Loader2, Sparkles } from "lucide-react";
 import aiBg from "@/assets/ai-preview/ai-preview-bg.jpg";
 
@@ -63,6 +64,10 @@ const RenovationPreview = () => {
   const [style, setStyle] = useState("");
   const [afterImage, setAfterImage] = useState("");
   const sectionRef = useRef<HTMLDivElement>(null);
+  // T9: dedicated Turnstile widget for the AI generation call (action
+  // "generate-renovation"). Separate from LeadCaptureForm's "submit-lead"
+  // widget — tokens are single-use and the actions must not be shared.
+  const renoTurnstileRef = useRef<TurnstileWidgetHandle>(null);
 
   // T1 analytics: fire the top-of-funnel event once when the flow mounts.
   useEffect(() => {
@@ -99,10 +104,15 @@ const RenovationPreview = () => {
     setStep("generating");
     trackFunnelStep("generation_start", { project_type: projectType || "", style: style || "" });
     setTimeout(scrollToTop, 100);
+    // T9: fresh single-use Turnstile token (action "generate-renovation"),
+    // forwarded by generateRenovation as the x-turnstile-token header. Reset
+    // after the attempt (in finally) so a retry gets a new token.
+    const turnstileToken = await renoTurnstileRef.current?.getToken();
     try {
       const result = await generateRenovation(
         { imageFile: file, projectType, style, budget, region, clientType, personalRequest },
-        () => { /* progress status intentionally not logged */ }
+        () => { /* progress status intentionally not logged */ },
+        turnstileToken
       );
       // The service returns a placeholder with an empty imageUrl on soft
       // failure (it never throws), so branch on the actual image to keep the
@@ -124,6 +134,9 @@ const RenovationPreview = () => {
         variant: "destructive",
       });
       setStep("capture");
+    } finally {
+      // Turnstile tokens are single-use — reset so a retry obtains a fresh one.
+      renoTurnstileRef.current?.reset();
     }
   };
 
@@ -164,6 +177,12 @@ const RenovationPreview = () => {
         <link rel="canonical" href="https://www.buildright-usa.com/renovation-preview" />
         <style>{scanBeamCss}</style>
       </Helmet>
+
+      {/* T9: invisible Turnstile widget for the AI generation call. Renders
+          nothing while VITE_TURNSTILE_SITE_KEY is unset (dev-bypass), so there
+          is no UX change today. action MUST match the edge function's
+          expectedAction ("generate-renovation"). */}
+      <TurnstileWidget ref={renoTurnstileRef} action="generate-renovation" />
 
       <section ref={sectionRef} className="relative py-6 md:py-12 min-h-[60vh] overflow-hidden">
         {showBg && (
