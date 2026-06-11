@@ -1,4 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { checkRateLimit, logAbuse } from "../_shared/rate-limit.ts";
+import { verifyTurnstile } from "../_shared/turnstile.ts";
 
 // CORS-TODO: shared origin allowlist (mirrors the other edge functions —
 // chat, submit-lead, notify-lead, distribute-lead, ai-renovation). Reflects
@@ -18,6 +20,15 @@ function corsHeadersFor(req: Request): Record<string, string> {
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
   };
+}
+
+// IP extraction — mirrors chat/submit-lead. Used as the rate-limit + abuse key.
+function getClientIP(req: Request): string {
+  return (
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    req.headers.get("cf-connecting-ip") ??
+    "unknown"
+  );
 }
 
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
@@ -168,6 +179,48 @@ Deno.serve(async (req: Request) => {
 
   // T6: per-request reflected CORS headers, reused by every response below.
   const cors = corsHeadersFor(req);
+
+  // ── T8: abuse protection — runs BEFORE req.json() and before any paid
+  //    OpenAI/Gemini call. SHADOW-WIRED: rate-limit `mode` is omitted so it
+  //    follows the global ENFORCE_RATE_LIMIT secret (defaults to observe);
+  //    the !allowed branch is ready but dormant until enforcement is enabled.
+  //    Turnstile is log-only here — no hard reject yet (frontend token lands
+  //    in T9, secret in T10). verifyTurnstile soft-passes until the secret is
+  //    set, so this is a no-op in dev/preview.
+  const ip = getClientIP(req);
+
+  const rl = await checkRateLimit({
+    endpoint: "generate-renovation:generate",
+    ip,
+    limit: 10,
+    windowSeconds: 600,
+    // mode omitted → inherits ENFORCE_RATE_LIMIT (defaults to "observe"/shadow)
+  });
+  if (!rl.allowed) {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        errorCode: "RATE_LIMITED",
+        message: "Too many requests. Please wait a moment and try again.",
+        retryAfter: rl.resetAt,
+      }),
+      { status: 429, headers: { ...cors, "Content-Type": "application/json" } },
+    );
+  }
+
+  const turnstileToken = req.headers.get("x-turnstile-token");
+  const turnstile = await verifyTurnstile(turnstileToken, {
+    remoteIp: ip,
+    expectedAction: "generate-renovation",
+  });
+  if (!turnstile.valid) {
+    // Shadow mode: log only, do NOT reject yet.
+    await logAbuse({
+      event_type: "turnstile_observed_invalid",
+      endpoint: "generate-renovation:generate",
+      details: { reason: turnstile.reason },
+    });
+  }
 
   console.log("[generate-renovation] request received");
 
