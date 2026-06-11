@@ -122,14 +122,22 @@ const RenovationPreview = () => {
         () => { /* progress status intentionally not logged */ },
         turnstileToken
       );
-      // The service returns a placeholder with an empty imageUrl on soft
-      // failure (it never throws), so branch on the actual image to keep the
-      // funnel honest about real successes vs. silent failures.
-      if (result.imageUrl) {
-        trackFunnelStep("generation_complete", { project_type: projectType || "", style: style || "" });
-      } else {
+      // V1.3: the service returns a placeholder with an empty imageUrl on soft
+      // failure (it never throws). Treat a missing image as a failure — do NOT
+      // advance to the result step (that would surface legacy "request received"
+      // copy). Show an honest retry and return to Customize.
+      if (!result.imageUrl) {
         trackFunnelStep("generation_failed", { reason: "no_image" });
+        toast({
+          title: "We couldn't generate your preview",
+          description: "Please try again, or adjust your photo or style.",
+          variant: "destructive",
+        });
+        setStep("configure");
+        setTimeout(scrollToTop, 100);
+        return;
       }
+      trackFunnelStep("generation_complete", { project_type: projectType || "", style: style || "" });
       setAfterImage(result.imageUrl);
       setStep("result");
       setTimeout(scrollToTop, 100);

@@ -44,13 +44,13 @@ const RenovationResult = ({ beforeImage, afterImage, projectType, style, onReset
                 <div className="text-center space-y-2">
                         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 text-accent text-sm font-medium">
                                   <Sparkles size={14} />
-                          {hasAfter ? "Your Preview Is Ready" : "Preview In Progress"}
+                          {hasAfter ? "Your Preview Is Ready" : "Preview Unavailable"}
                         </div>
                         <h2 className="font-display text-xl md:text-3xl font-bold text-foreground">
-                          {hasAfter ? "Your Renovation Preview" : "Thanks! Your request is in."}
+                          {hasAfter ? "Your Renovation Preview" : "We couldn't generate your preview"}
                         </h2>
                         <p className="text-sm text-muted-foreground">
-                          {hasAfter ? "Drag the slider to compare before & after" : "Our team will reach out shortly with your personalized renovation preview and quote."}
+                          {hasAfter ? "Drag the slider to compare before & after" : "Please go back and try again — adjust your photo or style."}
                         </p>
                 </div>
           
@@ -64,10 +64,10 @@ const RenovationResult = ({ beforeImage, afterImage, projectType, style, onReset
                                   <img src={beforeImage} alt="Your space" className="absolute inset-0 w-full h-full object-cover" />
                                 )}
                               <div className="absolute inset-0 bg-foreground/55 flex flex-col items-center justify-center text-background text-center p-6 space-y-3">
-                                          <Hourglass size={36} className="animate-pulse" />
-                                          <p className="font-display text-lg font-semibold">Generating your preview…</p>
+                                          <Hourglass size={36} />
+                                          <p className="font-display text-lg font-semibold">Preview unavailable</p>
                                           <p className="text-sm max-w-xs opacity-90">
-                                                        A licensed contractor will contact you shortly with personalized recommendations and a detailed quote.
+                                                        We couldn't generate an AI preview from this photo. Please go back and try again.
                                           </p>
                               </div>
                     </div>
