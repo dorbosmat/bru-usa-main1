@@ -104,11 +104,19 @@ const RenovationPreview = () => {
     setStep("generating");
     trackFunnelStep("generation_start", { project_type: projectType || "", style: style || "" });
     setTimeout(scrollToTop, 100);
-    // T9: fresh single-use Turnstile token (action "generate-renovation"),
-    // forwarded by generateRenovation as the x-turnstile-token header. Reset
-    // after the attempt (in finally) so a retry gets a new token.
-    const turnstileToken = await renoTurnstileRef.current?.getToken();
     try {
+      // T9 + V1.1: best-effort Turnstile token (action "generate-renovation"),
+      // forwarded by generateRenovation as the x-turnstile-token header.
+      // getToken() is now non-hanging (resolves on error/expired + an internal
+      // timeout), but we still guard it here so a token failure can NEVER block
+      // or freeze generation. Server-side Turnstile is shadow/log-only, so a
+      // missing token is acceptable.
+      let turnstileToken: string | undefined;
+      try {
+        turnstileToken = await renoTurnstileRef.current?.getToken();
+      } catch {
+        turnstileToken = undefined;
+      }
       const result = await generateRenovation(
         { imageFile: file, projectType, style, budget, region, clientType, personalRequest },
         () => { /* progress status intentionally not logged */ },

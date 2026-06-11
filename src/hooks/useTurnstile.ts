@@ -29,6 +29,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 const TURNSTILE_SCRIPT_SRC =
   "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
 const DEV_BYPASS_TOKEN = "dev-no-site-key";
+// V1.1: getToken() must never hang. If no token arrives within this window
+// (e.g. Turnstile error 110200 / network failure / blocked script), getToken
+// resolves with "" so callers are never blocked.
+const TOKEN_TIMEOUT_MS = 8000;
 
 export interface TurnstileOptions {
   /** Cloudflare Turnstile action — must match expectedAction in the
@@ -137,10 +141,18 @@ export function useTurnstile(opts: TurnstileOptions = {}): TurnstileHandle {
             waiters.forEach((w) => w(token));
           },
           "error-callback": () => {
+            // V1.1: resolve pending waiters with "" so getToken() never hangs on error.
             tokenRef.current = null;
+            const waiters = tokenWaitersRef.current;
+            tokenWaitersRef.current = [];
+            waiters.forEach((w) => w(""));
           },
           "expired-callback": () => {
+            // V1.1: resolve pending waiters with "" so getToken() never hangs on expiry.
             tokenRef.current = null;
+            const waiters = tokenWaitersRef.current;
+            tokenWaitersRef.current = [];
+            waiters.forEach((w) => w(""));
           },
         });
         setReady(true);
@@ -165,9 +177,16 @@ export function useTurnstile(opts: TurnstileOptions = {}): TurnstileHandle {
   const getToken = useCallback((): Promise<string> => {
     if (isDevBypass) return Promise.resolve(DEV_BYPASS_TOKEN);
     if (tokenRef.current) return Promise.resolve(tokenRef.current);
-    return new Promise<string>((resolve) => {
+    // V1.1: race the pending-token promise against a timeout so a failed,
+    // blocked, or never-rendered challenge can never block the caller. Resolves
+    // to "" on timeout; the error/expired callbacks also resolve waiters with "".
+    const pending = new Promise<string>((resolve) => {
       tokenWaitersRef.current.push(resolve);
     });
+    const timeout = new Promise<string>((resolve) => {
+      setTimeout(() => resolve(""), TOKEN_TIMEOUT_MS);
+    });
+    return Promise.race([pending, timeout]);
   }, [isDevBypass]);
 
   const reset = useCallback(() => {
