@@ -26,14 +26,28 @@ interface ProjectConfigProps {
   style: string;
   onProjectTypeChange: (t: string) => void;
   onStyleChange: (s: string) => void;
+  // Sprint 2 V1: personalization moved here from the (gated) lead form so the
+  // AI preview is reachable with no PII. All optional — generation defaults if blank.
+  budget: string;
+  region: string;
+  clientType: string;
+  personalRequest: string;
+  onBudgetChange: (v: string) => void;
+  onRegionChange: (v: string) => void;
+  onClientTypeChange: (v: string) => void;
+  onPersonalRequestChange: (v: string) => void;
   onBack: () => void;
   onGenerate: () => void;
   generating: boolean;
 }
 
+const selectClass = "w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50 transition-shadow cursor-pointer";
+
 const ProjectConfig = ({
   previewUrl, projectType, style,
   onProjectTypeChange, onStyleChange,
+  budget, region, clientType, personalRequest,
+  onBudgetChange, onRegionChange, onClientTypeChange, onPersonalRequestChange,
   onBack, onGenerate, generating,
 }: ProjectConfigProps) => {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -107,6 +121,47 @@ const ProjectConfig = ({
           </div>
         </div>
 
+        {/* Personalization (optional) — moved out of the gated lead form so the
+            AI before/after is reachable with no PII. */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="space-y-1.5">
+            <label htmlFor="pc-budget" className="text-sm font-medium text-foreground">Budget</label>
+            <select id="pc-budget" value={budget} onChange={(e) => onBudgetChange(e.target.value)} className={selectClass}>
+              <option>Budget-Friendly</option>
+              <option>Mid-Range</option>
+              <option>Luxury</option>
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <label htmlFor="pc-region" className="text-sm font-medium text-foreground">Region</label>
+            <select id="pc-region" value={region} onChange={(e) => onRegionChange(e.target.value)} className={selectClass}>
+              <option>Florida</option>
+              <option>California</option>
+              <option>Texas</option>
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <label htmlFor="pc-client-type" className="text-sm font-medium text-foreground">Client Type</label>
+            <select id="pc-client-type" value={clientType} onChange={(e) => onClientTypeChange(e.target.value)} className={selectClass}>
+              <option>Homeowner</option>
+              <option>Investor</option>
+              <option>Luxury Buyer</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <label htmlFor="pc-personal-request" className="text-sm font-medium text-foreground">Tell us what you want <span className="text-muted-foreground font-normal">(optional)</span></label>
+          <textarea
+            id="pc-personal-request"
+            value={personalRequest}
+            onChange={(e) => onPersonalRequestChange(e.target.value)}
+            placeholder="Example: a modern luxury kitchen with an island and warm lighting"
+            className={selectClass + " resize-none min-h-[80px]"}
+            maxLength={500}
+          />
+        </div>
+
         <Button
           variant="cta"
           size="lg"
@@ -115,7 +170,7 @@ const ProjectConfig = ({
           disabled={!projectType || !style || generating}
         >
           <Sparkles size={18} />
-          Continue to Preview
+          Reveal My Renovation
         </Button>
       </div>
     </div>

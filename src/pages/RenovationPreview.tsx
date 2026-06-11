@@ -3,7 +3,6 @@ import { Helmet } from "react-helmet-async";
 import Layout from "@/components/Layout";
 import PhotoUpload from "@/components/renovation/PhotoUpload";
 import ProjectConfig from "@/components/renovation/ProjectConfig";
-import LeadCaptureForm from "@/components/renovation/LeadCaptureForm";
 import RenovationResult from "@/components/renovation/RenovationResult";
 import { toast } from "@/hooks/use-toast";
 import { generateRenovation } from "@/services/renovation";
@@ -12,10 +11,14 @@ import TurnstileWidget, { type TurnstileWidgetHandle } from "@/components/Turnst
 import { Loader2, Sparkles } from "lucide-react";
 import aiBg from "@/assets/ai-preview/ai-preview-bg.jpg";
 
-// FLOW: upload → configure → capture (lead + personalization) → generating → result
-// Personalization fields are collected alongside lead info, then passed to generateRenovation.
+// FLOW (Sprint 2 V1 — wow before lead): upload → customize → generating → result.
+// The AI before/after is reachable with NO PII. Personalization (budget / region /
+// client type / request) is collected in the Customize step and passed straight to
+// generateRenovation. Lead capture and the contractor handoff remain gated — the
+// only path to a quote is RenovationResult's CTAs → /get-a-quote (which renders the
+// MaintenanceHoldingState while LEAD_SUBMISSION_ENABLED is false).
 
-type Step = "upload" | "configure" | "capture" | "generating" | "result";
+type Step = "upload" | "configure" | "generating" | "result";
 
 const scanBeamCss = `
   @keyframes ai-section-scan {
@@ -63,6 +66,13 @@ const RenovationPreview = () => {
   const [projectType, setProjectType] = useState("");
   const [style, setStyle] = useState("");
   const [afterImage, setAfterImage] = useState("");
+  // Personalization — collected in the Customize step (moved out of the lead
+  // form so the AI result is reachable with no PII). Defaults match the prior
+  // generateRenovation behavior.
+  const [budget, setBudget] = useState("Mid-Range");
+  const [region, setRegion] = useState("Florida");
+  const [clientType, setClientType] = useState("Homeowner");
+  const [personalRequest, setPersonalRequest] = useState("");
   const sectionRef = useRef<HTMLDivElement>(null);
   // T9: dedicated Turnstile widget for the AI generation call (action
   // "generate-renovation"). Separate from LeadCaptureForm's "submit-lead"
@@ -86,20 +96,10 @@ const RenovationPreview = () => {
     setTimeout(scrollToTop, 100);
   };
 
-  const handleConfigureDone = () => {
-    if (!file) return;
-    // projectType already set via onProjectTypeChange
-    // style already set via onStyleChange
-    setStep("capture");
-    setTimeout(scrollToTop, 100);
-  };
-
-  const handleLeadCaptured = async (
-    budget: string,
-    region: string,
-    clientType: string,
-    personalRequest: string
-  ) => {
+  // Sprint 2 V1: generation is triggered directly from the Customize step —
+  // NO lead form, NO PII. The before/after result IS the payoff; the gated
+  // contractor handoff lives downstream in RenovationResult's CTAs.
+  const handleGenerate = async () => {
     if (!file) return;
     setStep("generating");
     trackFunnelStep("generation_start", { project_type: projectType || "", style: style || "" });
@@ -133,7 +133,7 @@ const RenovationPreview = () => {
         description: err?.message ?? "Please try again.",
         variant: "destructive",
       });
-      setStep("capture");
+      setStep("configure");
     } finally {
       // Turnstile tokens are single-use — reset so a retry obtains a fresh one.
       renoTurnstileRef.current?.reset();
@@ -147,6 +147,10 @@ const RenovationPreview = () => {
     setProjectType("");
     setStyle("");
     setAfterImage("");
+    setBudget("Mid-Range");
+    setRegion("Florida");
+    setClientType("Homeowner");
+    setPersonalRequest("");
     setTimeout(scrollToTop, 100);
   };
 
@@ -154,17 +158,15 @@ const RenovationPreview = () => {
 
   const stepLabels = [
     { key: "upload",    label: "Upload"    },
-    { key: "configure", label: "Customize" },
-    { key: "preview",   label: "Preview"   },
-    { key: "quote",     label: "Get Quote" },
+    { key: "customize", label: "Customize" },
+    { key: "reveal",    label: "Reveal"    },
   ];
 
   const stepIndexMap: Record<Step, number> = {
     upload:     0,
     configure:  1,
-    capture:    2,
     generating: 2,
-    result:     3,
+    result:     2,
   };
 
   const activeIdx = stepIndexMap[step];
@@ -261,19 +263,17 @@ const RenovationPreview = () => {
               style={style}
               onProjectTypeChange={setProjectType}
               onStyleChange={setStyle}
+              budget={budget}
+              onBudgetChange={setBudget}
+              region={region}
+              onRegionChange={setRegion}
+              clientType={clientType}
+              onClientTypeChange={setClientType}
+              personalRequest={personalRequest}
+              onPersonalRequestChange={setPersonalRequest}
               onBack={() => { setStep("upload"); setTimeout(scrollToTop, 100); }}
-              onGenerate={handleConfigureDone}
+              onGenerate={handleGenerate}
               generating={false}
-            />
-          )}
-
-          {step === "capture" && (
-            <LeadCaptureForm
-              previewUrl={previewUrl}
-              projectType={projectType}
-              style={style}
-              onBack={() => { setStep("configure"); setTimeout(scrollToTop, 100); }}
-              onLeadCaptured={handleLeadCaptured}
             />
           )}
 
