@@ -17,7 +17,10 @@ function corsHeadersFor(req: Request): Record<string, string> {
   return {
     "Access-Control-Allow-Origin": allowed,
     "Vary": "Origin",
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    // V1.2: include x-turnstile-token — the frontend (T9) sends it on the
+    // generate-renovation request, so the preflight must allow it or the POST
+    // is blocked even on allowlisted production origins.
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-turnstile-token",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
   };
 }
